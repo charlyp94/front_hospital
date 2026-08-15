@@ -37,7 +37,7 @@ async function cargarDonaciones() {
 // 3. Función para enviar el cambio de estado al servidor
 async function cambiarEstado(id, nuevoEstado) {
     try {
-        const res = await fetch(`${CONFIG.API_BASE_URL}/donaciones/${id}/estado`, {
+        const res = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nuevoEstado })
