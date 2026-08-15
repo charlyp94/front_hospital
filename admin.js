@@ -1,7 +1,7 @@
 // 2. Función para cargar y mostrar las donaciones
 async function cargarDonaciones() {
     try {
-        const res = await fetch(`${CONFIG.API_BASE_URL}/donaciones`);
+        const res = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones`);
         const datos = await res.json();
         const cuerpo = document.getElementById('tabla-donaciones');
 

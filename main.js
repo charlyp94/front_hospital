@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const respuesta = await fetch(`${CONFIG.API_BASE_URL}/donaciones`, {
+                const respuesta = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosDonacion)
