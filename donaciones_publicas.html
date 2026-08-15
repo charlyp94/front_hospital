@@ -159,7 +159,7 @@
         async function cargarDonacionesPublicas() {
             try {
                 // 2. Usamos CONFIG.API_BASE_URL en lugar de la ruta estática
-                const res = await fetch(`${CONFIG.API_BASE_URL}/donaciones/aprobadas`);
+                const res = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/aprobadas`);
                 const datos = await res.json();
                 const cuerpo = document.getElementById('cuerpo-tabla');
 
