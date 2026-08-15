@@ -1,3 +1,3 @@
 const CONFIG = {
-    API_BASE_URL: 'http://localhost:3000/api' // URL real cuando lo despliegues
+    API_BASE_URL: 'https://back-hospital-euk1.onrender.com' // URL real cuando lo despliegues
 };
