@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Donaciones Recibidas - Hospital Luis A. Güemes</title>
+    <style>
+        /* --- ESTILOS CALCADOS DEL PANEL DE GESTIÓN --- */
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #4a2c35;
+            /* El fondo oscuro bordó del Admin */
+            color: #333;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 550px;
+            height: 480px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-image: url('../img/logo.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.15;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Barra superior blanca idéntica a la del Admin */
+        .navbar {
+            background: white;
+            padding: 8px 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar img {
+            width: 60px;
+            position: relative;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            font-weight: bold;
+        }
+
+        .nav-links a {
+            color: #332126;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            color: #4a2c35;
+        }
+
+        /* Estilo de título grande y blanco del Admin */
+        .page-title {
+            text-align: center;
+            color: white;
+            padding: 40px 0;
+        }
+
+        .page-title h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        /* Contenedor flotante de la tabla */
+        .table-container {
+            max-width: 1000px;
+            margin: 0 auto 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #332126;
+            color: white;
+            padding: 15px;
+        }
+
+        td {
+            border-bottom: 1px solid #ddd;
+            padding: 15px;
+            text-align: center;
+        }
+
+        /* Botón Volver estilizado abajo del contenedor */
+        .btn-volver {
+            display: block;
+            width: 150px;
+            margin: 20px auto 50px auto;
+            padding: 12px;
+            background: #1e8449;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-volver:hover {
+            background: #145a32;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <img src="./img/logo.jpg" alt="Logo">
+    </div>
+
+    <div class="page-title">
+        <h1>Donaciones Aprobadas y Destinadas</h1>
+    </div>
+
+    <div class="table-container">
+        <table id="tabla-publica">
+            <thead>
+                <tr>
+                    <th>Nombre / Empresa</th>
+                    <th>Fecha</th>
+                    <th>Categoría</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpo-tabla">
+                <tr>
+                    <td colspan="4" style="color: #666; font-style: italic;">Cargando registros públicos...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a href="index.html" class="btn-volver">Volver al Inicio</a>
+
+    <!-- 1. Cargamos primero el archivo de configuración global -->
+    <script src="config.js"></script>
+
+    <script>
+        async function cargarDonacionesPublicas() {
+            try {
+                // 2. Usamos CONFIG.API_BASE_URL en lugar de la ruta estática
+                const res = await fetch(`${CONFIG.API_BASE_URL}/donaciones/aprobadas`);
+                const datos = await res.json();
+                const cuerpo = document.getElementById('cuerpo-tabla');
+
+                cuerpo.innerHTML = '';
+
+                if (datos.length === 0) {
+                    cuerpo.innerHTML = '<tr><td colspan="4" style="color: #777; padding: 20px;">Aún no hay donaciones aprobadas para mostrar.</td></tr>';
+                    return;
+                }
+
+                cuerpo.innerHTML = datos.map(d => `
+                    <tr>
+                        <td style="font-weight: bold; color: #222;">${d.nombre}</td>
+                        <td>${d.fecha ? new Date(d.fecha).toLocaleDateString('es-AR') : 'Sin fecha'}</td>
+                        <td>${d.categoria}</td>
+                        <td>${d.cantidad || 0}</td>
+                    </tr>
+                `).join('');
+
+            } catch (error) {
+                console.error("Error al cargar datos públicos:", error);
+                const cuerpo = document.getElementById('cuerpo-tabla');
+                cuerpo.innerHTML = '<tr><td colspan="4" style="color: red; font-weight: bold; padding: 20px;">Error al conectar con el servidor.</td></tr>';
+            }
+        }
+
+        // Ejecuta la carga cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', cargarDonacionesPublicas);
+    </script>
+</body>
+
+</html>
