@@ -13,36 +13,39 @@
 }
 
 /* ==========================================================================
-   2. ESTILOS GENERALES Y MARCA DE AGUA GLOBAL
+   2. ESTILOS GENERALES Y MARCA DE AGUA GLOBAL (RESPONSIVE)
    ========================================================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    max-width: 100%;
+}
+
+html, body {
+    width: 100%;
+    overflow-x: hidden; /* Evita que la página se desborde hacia los costados en celulares */
 }
 
 body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     color: var(--texto-claro);
-    background-color: var(--bordo-suave); /* Fondo general más relajado a la vista */
+    background-color: var(--bordo-suave);
     line-height: 1.6;
     position: relative;
 }
 
-/* Marca de agua global: Ahora más visible */
-/* Marca de agua global: Configurada para que se vea ovalada */
+/* Marca de agua global ovalada adaptada para móviles */
 body::before {
     content: "";
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    
-    /* CAMBIO CLAVE: Ajustamos ancho y alto distintos para forzar el óvalo */
-    width: 550px;  /* Más ancho */
-    height: 480px; /* Menos alto */
-    border-radius: 50%; /* Esto estira las esquinas convirtiéndolo en un óvalo */
-    overflow: hidden; /* Corta lo que quede fuera del óvalo si es necesario */
+    width: min(550px, 90vw);  /* Se adapta si la pantalla del celu es muy angosta */
+    height: min(480px, 80vh);
+    border-radius: 50%;
+    overflow: hidden;
     background-image: url('/logo.jpg'); 
     background-size: contain;
     background-repeat: no-repeat;
@@ -53,7 +56,7 @@ body::before {
 }
 
 /* ==========================================================================
-   3. ENCABEZADO (Navbar)
+   3. ENCABEZADO (Navbar Responsivo)
    ========================================================================== */
 .navbar {
     display: flex;
@@ -65,64 +68,61 @@ body::before {
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%;
 }
 
 .logo-container {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .logo-img {
-    height: 90px;
+    height: 70px; /* Ajustado ligeramente para que no ocupe toda la pantalla en celulares */
     width: auto;
 }
 
 .logo-texto h2 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 800;
     letter-spacing: 0.5px;
     color: #111111;
 }
 
 .logo-texto p {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #555555;
     font-weight: 600;
 }
 
-/* Contenedor del menú para alinear los nuevos botones */
+/* Menú adaptado para dispositivos móviles */
 .menu {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     align-items: center;
 }
 
-/* Transformación de los links de arriba en botones estéticos y uniformes */
 .menu a {
     text-decoration: none;
-    color: #ffffff !important; /* Fuerza el texto blanco para resaltar sobre el fondo oscuro */
+    color: #ffffff !important;
     font-family: 'Segoe UI', Roboto, sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 8px 16px;
+    padding: 6px 12px;
     border-radius: 6px;
-    background: rgba(0, 0, 0, 0.75) !important; /* Fondo oscuro elegante */
-    border: 1px solid rgba(255, 255, 255, 0.15); /* Borde sutil claro para definición */
-    margin-left: 0 !important; /* Reseteamos el margen viejo para usar el gap del contenedor */
+    background: rgba(0, 0, 0, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     transition: all 0.3s ease;
 }
 
-/* Efecto hover al pasar el mouse por encima de los botones comunes */
 .menu a:hover {
-    background: rgba(0, 0, 0, 0.9) !important; /* Se oscurece un toque más al interactuar */
+    background: rgba(0, 0, 0, 0.9) !important;
     border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-1px);
 }
 
-/* Estilo destacado exclusivo para el botón de Historial (mantiene su esencia médica verde) */
 #menuHistorial {
-    background: rgba(30, 132, 73, 0.85) !important; /* Verde oscuro translúcido en sintonía con el resto */
+    background: rgba(30, 132, 73, 0.85) !important;
     border-color: rgba(30, 132, 73, 0.5);
 }
 
@@ -136,9 +136,9 @@ body::before {
    4. SECCIÓN PRINCIPAL (Hero Section)
    ========================================================================== */
 .hero-section {
-    padding: 100px 5%;
+    padding: 60px 5%; /* Reducido para mejor visualización vertical en celulares */
     text-align: center;
-    background: transparent; /* Permite apreciar el logo de fondo */
+    background: transparent;
 }
 
 .hero-contenido {
@@ -147,27 +147,38 @@ body::before {
 }
 
 .hero-contenido h1 {
-    font-size: 3rem;
+    font-size: clamp(2rem, 5vw, 3rem); /* Tamaño dinámico según la pantalla */
     margin-bottom: 20px;
     color: var(--texto-claro);
     text-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
 .hero-contenido p {
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 3vw, 1.25rem);
     color: var(--texto-mutado);
-    margin-bottom: 40px;
+    margin-bottom: 30px;
+}
+
+.hero-botones {
+    display: flex;
+    flex-direction: column; /* Apila los botones de inicio en columna vertical en móviles */
+    gap: 15px; 
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
 }
 
 .btn-donar {
     background-color: var(--verde-hospital);
     color: var(--blanco);
     border: none;
-    padding: 18px 40px;
-    font-size: 1.25rem;
+    padding: 16px 30px;
+    font-size: 1.15rem;
     font-weight: 700;
     border-radius: 8px;
     cursor: pointer;
+    width: 100%;
+    max-width: 320px; /* Limita el ancho máximo en computadoras */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
 }
@@ -177,29 +188,44 @@ body::before {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
-/* Efecto hover para el botón de ver historial */
+
+.btn-personal {
+    background-color: #34495e;
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 320px;
+    transition: background 0.3s ease;
+}
+
+.btn-personal:hover {
+    background-color: #2c3e50;
+}
+
 #btnVerHistorial:hover {
     background-color: var(--verde-hover);
-    filter: brightness(85%);   /* Esto lo oscurece automáticamente un 15% al pasar el mouse */
-    cursor: pointer;           /* Asegura que aparezca la manito del mouse */
-    transition: background-color 0.3s ease, filter 0.3s ease; /* Hace que el cambio sea suave */
+    filter: brightness(85%);
+    cursor: pointer;
+    transition: background-color 0.3s ease, filter 0.3s ease;
 }
 
 /* ==========================================================================
-   5. SECCIÓN INFORMATIVA (Tarjetas de destino)
+   5. SECCIÓN INFORMATIVA (Tarjetas de destino responsivas)
    ========================================================================== */
 .info-section {
-    padding: 80px 5%;
-    /* CAMBIO CLAVE: Quitamos el color sólido y usamos un negro con 15% de transparencia */
-    /* Esto oscurece un toque la zona para separar las secciones, pero deja pasar el logo de fondo */
+    padding: 60px 5%;
     background-color: rgba(0, 0, 0, 0.15); 
     text-align: center;
 }
 
 .info-section h2 {
-    font-size: 2.2rem;
+    font-size: clamp(1.8rem, 4vw, 2.2rem);
     color: var(--texto-claro);
-    margin-bottom: 50px;
+    margin-bottom: 40px;
     position: relative;
 }
 
@@ -216,17 +242,25 @@ body::before {
 .tarjetas-container {
     display: flex;
     justify-content: center;
-    gap: 30px;
+    gap: 20px;
     flex-wrap: wrap;
 }
 
+.tarjeta-link {
+    text-decoration: none;
+    display: block;
+    color: inherit;
+    width: 100%;
+    max-width: 310px; /* Se adapta automáticamente al ancho del celular */
+}
+
 .tarjeta {
-    background-color: rgba(255, 255, 255, 0.05); /* Cristal sutil */
+    background-color: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 35px 30px;
+    padding: 30px 20px;
     border-radius: 14px;
-    width: 310px;
+    width: 100%;
     border-top: 5px solid var(--verde-hospital);
     transition: transform 0.3s ease, background-color 0.3s ease;
 }
@@ -238,7 +272,7 @@ body::before {
 
 .tarjeta h3 {
     margin-bottom: 15px;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     color: var(--blanco);
 }
 
@@ -248,47 +282,110 @@ body::before {
 }
 
 /* ==========================================================================
-   6. ESTILOS DE LA VENTANA MODAL Y FORMULARIO
+   6. SECCIÓN DE TRANSPARENCIA Y CRONOLOGÍA
+   ========================================================================== */
+.transparencia-section {
+    padding: 70px 5%;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.subtitulo-seccion {
+    color: var(--texto-mutado);
+    margin-bottom: 40px;
+    font-size: 1rem;
+}
+
+.cronologia-contenedor {
+    max-width: 750px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.item-destino {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background-color: rgba(255, 255, 255, 0.04);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: left;
+    border-left: 4px solid var(--rosa-lapacho);
+    transition: background-color 0.3s;
+}
+
+.item-destino:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.icono-destino {
+    font-size: 2.2rem;
+}
+
+.texto-destino h4 {
+    font-size: 1.15rem;
+    color: var(--blanco);
+    margin-bottom: 5px;
+}
+
+.texto-destino p {
+    color: var(--texto-mutado);
+    font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   7. VENTANAS MODALES Y FORMULARIOS (Optimizados para pantallas verticales)
    ========================================================================== */
 .modal-overlay {
+    display: none; 
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: none;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999999;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
+    padding: 15px; /* Deja respiro en los bordes del celular */
 }
 
 .modal-overlay.mostrar {
-    opacity: 1;
-    pointer-events: auto;
+    display: flex !important;
 }
 
 .modal-content {
-    background-color: var(--blanco);
+    background: white !important;
     color: #111111;
-    padding: 40px;
-    border-radius: 16px;
+    padding: 25px;
+    border-radius: 12px;
     width: 100%;
-    max-width: 550px;
-    max-height: 90vh;
+    max-width: 520px;
+    max-height: 85vh;
     overflow-y: auto;
     position: relative;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
 }
 
+.modal-content-admin {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 100%;
+    margin: auto;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
 .btn-cerrar {
     position: absolute;
-    top: 20px;
-    right: 25px;
-    font-size: 2rem;
+    top: 15px;
+    right: 20px;
+    font-size: 1.8rem;
     font-weight: bold;
     color: #555555;
     cursor: pointer;
@@ -300,25 +397,33 @@ body::before {
 }
 
 .modal-content h2 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: #111111;
     margin-bottom: 5px;
 }
 
 .modal-subtitulo {
     color: #555555;
-    font-size: 0.9rem;
-    margin-bottom: 25px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
 }
 
 .form-grupo {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-align: left;
 }
 
 .form-row {
     display: flex;
+    flex-direction: column; /* En celulares los campos se apilan en vertical para no achicarse de más */
     gap: 15px;
+}
+
+/* En tablets o pantallas más anchas vuelve a ponerse en fila horizontal */
+@media (min-width: 600px) {
+    .form-row {
+        flex-direction: row;
+    }
 }
 
 .form-row .form-grupo {
@@ -328,21 +433,22 @@ body::before {
 label {
     display: block;
     font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
     color: #222222;
 }
 
 .label-principal {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     border-bottom: 1px solid #eef2f3;
     padding-bottom: 5px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 input[type="text"],
 input[type="email"],
-input[type="date"] {
+input[type="date"],
+input[type="password"] {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccd1d1;
@@ -360,7 +466,7 @@ input:focus {
 .radio-opciones, .checkbox-opciones {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .radio-label, .checkbox-label {
@@ -368,6 +474,7 @@ input:focus {
     align-items: center;
     gap: 10px;
     font-weight: 500;
+    font-size: 0.9rem;
     cursor: pointer;
 }
 
@@ -383,7 +490,7 @@ input[type="radio"], input[type="checkbox"] {
     border: none;
     width: 100%;
     padding: 14px;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     border-radius: 6px;
     cursor: pointer;
@@ -394,186 +501,12 @@ input[type="radio"], input[type="checkbox"] {
 .btn-enviar:hover {
     background-color: var(--verde-hover);
 }
-/* ==========================================================================
-   7. SECCIÓN DE TRANSPARENCIA Y ENLACES DE TARJETAS
-   ========================================================================== */
-/* Quitamos el subrayado de los links de las tarjetas y permitimos el bloque */
-.tarjeta-link {
-    text-decoration: none;
-    display: block;
-    color: inherit;
-}
 
-/* Sección nueva */
-.transparencia-section {
-    padding: 90px 5%;
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.25); /* Un tono más oscuro para dar profundidad */
-    box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.subtitulo-seccion {
-    color: var(--texto-mutado);
-    margin-bottom: 50px;
-    font-size: 1.1rem;
-}
-
-.cronologia-contenedor {
-    max-width: 750px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
-.item-destino {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    background-color: rgba(255, 255, 255, 0.04);
-    padding: 25px;
-    border-radius: 12px;
-    text-align: left;
-    border-left: 4px solid var(--rosa-lapacho); /* Detalle rosa del lapacho */
-    transition: background-color 0.3s;
-}
-
-.item-destino:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-}
-
-.icono-destino {
-    font-size: 2.5rem;
-}
-
-.texto-destino h4 {
-    font-size: 1.25rem;
-    color: var(--blanco);
-    margin-bottom: 5px;
-}
-
-.texto-destino p {
-    color: var(--texto-mutado);
-    font-size: 0.95rem;
-}
-
-/* Efecto mágico: Hace que CUALQUIER clic interno viaje de forma suave */
-html {
-    scroll-behavior: auto;
-}
-.modal-overlay {
-    display: none; /* Oculto por defecto */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-}
-#modalDonacion {
-    display: flex !important; 
-    background-color: rgba(255, 0, 0, 0.5) !important; /* Fondo rojo para ver si aparece */
-}
-#modalDonacion {
-    display: flex !important; /* Fuerza la visibilidad */
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background-color: rgba(0, 0, 0, 0.8) !important;
-    z-index: 999999 !important; /* Lo trae al frente de cualquier otra cosa */
-    overflow-y: auto;
-}
-
-/* Asegura que el contenido sea visible */
-.modal-content {
-    background: white !important;
-    padding: 30px !important;
-    border-radius: 8px !important;
-    max-width: 500px !important;
-    width: 90% !important;
-    margin: auto !important;
-    position: relative !important;
-    z-index: 1000000 !important;
-}
-#modalDonacion {
-    display: flex !important;       /* Fuerza la visibilidad */
-    position: fixed !important;     /* Lo fija a la ventana */
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;         /* Ocupa todo el ancho */
-    height: 100% !important;        /* Ocupa todo el alto */
-    background: rgba(0, 0, 0, 0.7) !important; /* Fondo oscuro */
-    z-index: 9999999 !important;    /* Lo pone encima de TODO */
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background: white !important;
-    padding: 40px !important;
-    border-radius: 10px !important;
-    z-index: 10000000 !important;
-    max-width: 500px !important;
-    width: 90% !important;
-    position: relative;
-}
-.hero-botones {
-    display: flex;
-    gap: 15px; /* Separa los dos botones */
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.btn-personal {
-    background-color: #34495e; /* Un tono gris azulado muy profesional */
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.btn-personal:hover {
-    background-color: #2c3e50; /* Oscurece al pasar el mouse */
-}
-/* Contenedor específico para el cuadro del login, reutilizando el overlay existente */
-.modal-content-admin {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    max-width: 400px; /* Un poco más angosto que el de donaciones */
-    width: 90%;
-    margin: auto;
-    position: relative;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Estilo para el input de contraseña */
-.modal-content-admin input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-/* Esto asegura que el SweetAlert siempre sea visible */
-.swal2-container {
-    z-index: 999999 !important;
-}
-/* Esto asegura que nada bloquee el cartel */
+/* Asegura que alertas externas (SweetAlert) mantengan el foco superior */
 .swal2-container {
     z-index: 9999999 !important;
 }
 
-/* Verificamos que el modal no esté "flotando" encima de todo */
-#modalDonacion {
-    z-index: 1000 !important;
+html {
+    scroll-behavior: smooth; /* Desplazamiento suave general */
 }
