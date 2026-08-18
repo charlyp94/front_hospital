@@ -43,7 +43,7 @@ body::before {
     height: 480px; /* Menos alto */
     border-radius: 50%; /* Esto estira las esquinas convirtiéndolo en un óvalo */
     overflow: hidden; /* Corta lo que quede fuera del óvalo si es necesario */
-    background-image: url('../img/logo.jpg'); 
+    background-image: url('/logo.jpg'); 
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
