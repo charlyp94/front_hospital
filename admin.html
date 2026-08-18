@@ -56,6 +56,24 @@
             gap: 20px;
             font-weight: bold;
         }
+        /* Botón Volver estilizado abajo del contenedor */
+        .btn-volver {
+            display: block;
+            width: 150px;
+            margin: 20px auto 50px auto;
+            padding: 12px;
+            background: #1e8449;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-volver:hover {
+            background: #145a32;
+        }
 
         /* Título */
         .page-title {
@@ -151,9 +169,9 @@
 <body>
 
     <div class="navbar">
-        <img src="logo.jpg" alt="Logo">
+        <img src="/logo.jpg" alt="Logo">
         <div class="nav-links">
-            <a href="index.html">Inicio</a>
+            <a href="index.html" class="btn-volver">Volver al Inicio</a>
         </div>
     </div>
 
