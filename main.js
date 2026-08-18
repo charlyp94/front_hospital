@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             });
                         };
 
-                        cargarImagenComoBase64('./img/logo.jpg')
+                        cargarImagenComoBase64('/logo.jpg')
                             .then((logoBase64) => {
                                 window.logoBase64 = logoBase64;
                                 doc.saveGraphicsState();
