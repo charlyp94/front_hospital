@@ -37,7 +37,7 @@
         /* Barra superior */
         .navbar {
             background: white;
-            padding: 10px 30px;
+            padding: 10px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -47,17 +47,17 @@
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         .logo-img {
-            height: 70px;
-            width: 90px;
+            height: 60px;
+            width: 80px;
             object-fit: contain;
         }
 
         .logo-texto h2 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 800;
             letter-spacing: 0.5px;
             color: #111111;
@@ -65,7 +65,7 @@
         }
 
         .logo-texto p {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #555555;
             font-weight: 600;
             margin: 2px 0 0 0;
@@ -75,27 +75,27 @@
         .page-title {
             text-align: center;
             color: white;
-            padding: 30px 15px;
+            padding: 25px 15px;
         }
 
         .page-title h1 {
             margin: 0;
-            font-size: 2.2em;
+            font-size: 1.8em;
         }
 
-        /* Contenedor flotante de la tabla adaptativo */
+        /* Contenedor flotante de la tabla optimizado */
         .table-container {
             max-width: 1000px;
-            width: 94%;
-            margin: 0 auto 30px auto;
+            width: 96%;
+            margin: 0 auto 20px auto;
             background: white;
-            padding: 25px;
+            padding: 15px 10px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             box-sizing: border-box;
         }
 
-        /* Contenedor con scroll horizontal para celulares */
+        /* Contenedor con scroll horizontal perfecto para celulares */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -105,28 +105,29 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 500px; /* Asegura que no se comprima de más en pantallas chicas */
+            min-width: 600px; /* Fuerza el ancho mínimo para que todas las columnas entren holgadas con scroll */
         }
 
         th {
             background-color: #332126;
             color: white;
-            padding: 14px 12px;
-            font-size: 15px;
+            padding: 12px 10px;
+            font-size: 14px;
+            white-space: nowrap;
         }
 
         td {
             border-bottom: 1px solid #ddd;
-            padding: 14px 12px;
+            padding: 12px 10px;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         /* Botón Volver estilizado */
         .btn-volver {
             display: block;
-            width: 180px;
-            margin: 20px auto 50px auto;
+            width: 160px;
+            margin: 20px auto 40px auto;
             padding: 12px;
             background: #1e8449;
             color: white;
@@ -142,31 +143,27 @@
             background: #145a32;
         }
 
-        /* --- MEDIA QUERIES PARA CELULARES (<= 768px) --- */
+        /* --- MEDIA QUERIES PARA CELULARES --- */
         @media (max-width: 768px) {
             .navbar {
-                padding: 10px 15px;
+                padding: 8px 12px;
             }
             .logo-img {
-                height: 50px;
-                width: 65px;
+                height: 45px;
+                width: 60px;
             }
             .logo-texto h2 {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
             .logo-texto p {
-                font-size: 0.7rem;
+                font-size: 0.65rem;
             }
             .page-title h1 {
-                font-size: 1.6em;
+                font-size: 1.4em;
             }
             .table-container {
-                padding: 15px 10px;
-                width: 92%;
-            }
-            th, td {
-                padding: 10px 8px;
-                font-size: 13px;
+                width: 98%; /* Ocupa casi todo el ancho de la pantalla del celular */
+                padding: 10px 5px;
             }
         }
     </style>
@@ -210,13 +207,12 @@
 
     <a href="index.html" class="btn-volver">Volver al Inicio</a>
 
-    <!-- 1. Cargamos primero el archivo de configuración global -->
+    <!-- Cargamos el archivo de configuración global -->
     <script src="config.js"></script>
 
     <script>
         async function cargarDonacionesPublicas() {
             try {
-                // Se utiliza CONFIG.API_BASE_URL definida en config.js de forma dinámica
                 const urlApi = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) 
                     ? `${CONFIG.API_BASE_URL}/api/donaciones/aprobadas` 
                     : 'https://back-hospital-euk1.onrender.com/api/donaciones/aprobadas';
@@ -248,7 +244,6 @@
             }
         }
 
-        // Ejecuta la carga cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', cargarDonacionesPublicas);
     </script>
 </body>
