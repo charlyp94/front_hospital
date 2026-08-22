@@ -95,7 +95,6 @@
             box-sizing: border-box;
         }
 
-        /* Contenedor con scroll horizontal perfecto para celulares */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -105,7 +104,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px; /* Fuerza el ancho mínimo para que todas las columnas entren holgadas con scroll */
+            min-width: 600px;
         }
 
         th {
@@ -121,6 +120,92 @@
             padding: 12px 10px;
             text-align: center;
             font-size: 13px;
+        }
+
+        /* Fila interactiva para celulares */
+        .fila-donacion {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .fila-donacion:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* --- VENTANA FLOTANTE (MODAL) CON ANIMACIÓN FLUIDA EN CELULARES --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999999;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: left;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #4a2c35;
+            font-size: 1.3rem;
+            text-align: center;
+            border-bottom: 2px solid #f1f1f1;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .modal-detalle {
+            margin: 10px 0;
+            font-size: 15px;
+            color: #444;
+        }
+
+        .modal-detalle strong {
+            color: #332126;
+        }
+
+        .modal-btn-cerrar {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            background-color: #1e8449;
+            color: white;
+            text-align: center;
+        }
+
+        .modal-btn-cerrar:hover {
+            background-color: #145a32;
         }
 
         /* Botón Volver estilizado */
@@ -162,7 +247,7 @@
                 font-size: 1.4em;
             }
             .table-container {
-                width: 98%; /* Ocupa casi todo el ancho de la pantalla del celular */
+                width: 98%;
                 padding: 10px 5px;
             }
         }
@@ -207,6 +292,15 @@
 
     <a href="index.html" class="btn-volver">Volver al Inicio</a>
 
+    <!-- VENTANA FLOTANTE (MODAL) CON RESUMEN PARA CELULARES -->
+    <div id="modalResumen" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Detalle de Donación</h3>
+            <div id="modalContenidoTexto"></div>
+            <button class="modal-btn-cerrar" onclick="cerrarModalResumen()">Cerrar</button>
+        </div>
+    </div>
+
     <!-- Cargamos el archivo de configuración global -->
     <script src="config.js"></script>
 
@@ -228,20 +322,55 @@
                     return;
                 }
 
-                cuerpo.innerHTML = datos.map(d => `
-                    <tr>
-                        <td style="font-weight: bold; color: #222;">${d.nombre}</td>
-                        <td>${d.fecha ? new Date(d.fecha).toLocaleDateString('es-AR') : 'Sin fecha'}</td>
-                        <td>${d.categoria}</td>
-                        <td>${d.cantidad || 0}</td>
-                    </tr>
-                `).join('');
+                cuerpo.innerHTML = datos.map(d => {
+                    const fechaFormateada = d.fecha ? new Date(d.fecha).toLocaleDateString('es-AR') : 'Sin fecha';
+                    // Convertimos los datos a formato seguro para pasarlos por la función al tocar la fila
+                    const nombreSeguro = encodeURIComponent(d.nombre || '');
+                    const categoriaSegura = encodeURIComponent(d.categoria || '');
+                    const cantidadSegura = d.cantidad || 0;
+
+                    return `
+                        <tr class="fila-donacion" onclick="manejarClickFila('${nombreSeguro}', '${fechaFormateada}', '${categoriaSegura}', '${cantidadSegura}')">
+                            <td style="font-weight: bold; color: #222;">${d.nombre}</td>
+                            <td>${fechaFormateada}</td>
+                            <td>${d.categoria}</td>
+                            <td>${d.cantidad || 0}</td>
+                        </tr>
+                    `;
+                }).join('');
 
             } catch (error) {
                 console.error("Error al cargar datos públicos:", error);
                 const cuerpo = document.getElementById('cuerpo-tabla');
                 cuerpo.innerHTML = '<tr><td colspan="4" style="color: red; font-weight: bold; padding: 20px;">Error al conectar con el servidor.</td></tr>';
             }
+        }
+
+        // Lógica para abrir el resumen flotante solo en celulares (o pantallas menores a 768px)
+        function manejarClickFila(nombre, fecha, categoria, cantidad) {
+            if (window.innerWidth <= 768) {
+                const contenido = document.getElementById('modalContenidoTexto');
+                contenido.innerHTML = `
+                    <div class="modal-detalle"><strong>Nombre:</strong> ${decodeURIComponent(nombre)}</div>
+                    <div class="modal-detalle"><strong>Fecha:</strong> ${fecha}</div>
+                    <div class="modal-detalle"><strong>Categoría:</strong> ${decodeURIComponent(categoria)}</div>
+                    <div class="modal-detalle"><strong>Cantidad:</strong> ${cantidad}</div>
+                `;
+
+                const modal = document.getElementById('modalResumen');
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('active');
+                }, 10);
+            }
+        }
+
+        function cerrarModalResumen() {
+            const modal = document.getElementById('modalResumen');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
         }
 
         document.addEventListener('DOMContentLoaded', cargarDonacionesPublicas);
