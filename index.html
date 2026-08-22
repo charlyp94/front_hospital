@@ -8,7 +8,7 @@
     <link rel="icon" type="image/jpg" href="logo.jpg">
     <link rel="stylesheet" href="estilos.css">
     
-    <!-- Estilos mejorados para el menú hamburguesa elegante y animado -->
+    <!-- Estilos mejorados para el menú hamburguesa y adaptación responsiva de la sección de pasos -->
     <style>
         /* Botón hamburguesa elegante */
         .btn-menu-hamburguesa {
@@ -36,7 +36,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Animación de transformación del botón a una "X" sutil cuando está activo */
+        /* Animación del botón a una "X" sutil */
         .btn-menu-hamburguesa.activo span:nth-child(1) {
             transform: translateY(7px) rotate(45deg);
         }
@@ -47,7 +47,16 @@
             transform: translateY(-7px) rotate(-45deg);
         }
 
-        /* Reglas exclusivas para celulares (pantallas menores o iguales a 768px) */
+        /* --- CLASE ADAPTATIVA PARA LOS PASOS --- */
+        .pasos-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 35px;
+            width: 100%;
+        }
+
+        /* Reglas exclusivas para celulares y tablets (pantallas menores o iguales a 768px) */
         @media (max-width: 768px) {
             .navbar {
                 position: relative;
@@ -58,7 +67,7 @@
             .btn-menu-hamburguesa {
                 display: flex;
             }
-            /* Menú oculto inicialmente con animación suave de bajada y opacidad */
+            /* Menú desplegable animado para móvil */
             .navbar .menu {
                 display: flex;
                 flex-direction: column;
@@ -81,7 +90,6 @@
                             transform 0.3s ease, 
                             padding 0.3s ease;
             }
-            /* Estado activo con despliegue fluido y elegante */
             .navbar .menu.activo {
                 max-height: 350px;
                 opacity: 1;
@@ -98,6 +106,27 @@
             }
             .navbar .menu a:hover {
                 background-color: #f8f9fa;
+            }
+
+            /* --- ADAPTACIÓN DE LA SECCIÓN DE PASOS EN MÓVIL --- */
+            .pasos-grid {
+                grid-template-columns: 1fr !important; /* Pasa de 4 columnas a una sola columna vertical */
+                gap: 15px !important;
+            }
+
+            /* Ajuste de márgenes y tamaños del contenedor general en dispositivos móviles */
+            div[style*="margin-top: 60px"] {
+                width: 92vw !important;
+                margin-left: -46vw !important;
+                margin-right: -46vw !important;
+                padding: 25px 4% !important;
+                margin-top: 30px !important;
+            }
+
+            /* Título principal de la sección más chico para que no se corte */
+            div[style*="margin-top: 60px"] h3 {
+                font-size: 22px !important;
+                margin-bottom: 20px !important;
             }
         }
     </style>
@@ -143,6 +172,7 @@
                 <button id="btnAccesoPersonal" class="btn-donar">Panel de Gestión</button>
             </div>
 
+            <!-- Contenedor con la clase limpia .pasos-grid -->
             <div
                 style="width: 94vw; position: relative; left: 50%; right: 50%; margin-left: -47vw; margin-right: -47vw; margin-top: 60px; padding: 40px 2%; border-top: 2px dashed rgba(255,255,255,0.2); text-align: left; font-family: 'Helvetica', Arial, sans-serif; box-sizing: border-box;">
 
@@ -151,8 +181,7 @@
                     📌 Pasos Cruciales tras Confirmar tu Intención de Donación
                 </h3>
 
-                <div
-                    style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-bottom: 35px; width: 100%;">
+                <div class="pasos-grid">
 
                     <div
                         style="background: rgba(255, 255, 255, 0.08); padding: 30px 22px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: space-between;">
@@ -429,13 +458,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-    <!-- 1. Cargamos el archivo de configuración global -->
+    <!-- 1. Configuración global -->
     <script src="config.js"></script>
 
-    <!-- 2. Cargamos el script principal ubicado en la raíz -->
+    <!-- 2. Script principal -->
     <script src="main.js"></script>
 
-    <!-- Script de control para la animación fluida del menú hamburguesa -->
+    <!-- Script de control para el menú hamburguesa -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnHamburguesa = document.getElementById('btnHamburguesa');
@@ -447,7 +476,6 @@
                     btnHamburguesa.classList.toggle('activo');
                 });
 
-                // Cierra el menú suavemente al hacer clic en cualquier opción
                 menu.querySelectorAll('a').forEach(enlace => {
                     enlace.addEventListener('click', () => {
                         menu.classList.remove('activo');
