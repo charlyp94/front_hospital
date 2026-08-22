@@ -129,42 +129,14 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 14px;
+            transition: background-color 0.2s ease;
         }
 
         .dropdown-toggle:hover {
             background-color: #037b23;
         }
 
-        /* Menú desplegable para PC */
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            min-width: 150px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            border-radius: 6px;
-            z-index: 99999;
-            text-align: left;
-        }
-
-        .dropdown-item {
-            padding: 12px;
-            display: block;
-            cursor: pointer;
-            color: #333;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f1f1f1;
-        }
-
-        .dropdown-item.selected {
-            background-color: #09cf37;
-            color: white;
-        }
-
-        /* --- VENTANA FLOTANTE (MODAL) CON ANIMACIÓN FLUIDA EN CELULARES --- */
+        /* --- VENTANA FLOTANTE (MODAL) CON ANIMACIÓN FLUIDA UNIVERSAL --- */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -220,6 +192,11 @@
             cursor: pointer;
             background-color: #f1f1f1;
             color: #333;
+            transition: background-color 0.2s ease;
+        }
+
+        .modal-btn:hover {
+            background-color: #e2e2e2;
         }
 
         .modal-btn.selected {
@@ -227,10 +204,18 @@
             color: white;
         }
 
+        .modal-btn.selected:hover {
+            background-color: #037b23;
+        }
+
         .modal-btn-cerrar {
             background-color: #cc0000;
             color: white;
             margin-top: 15px;
+        }
+
+        .modal-btn-cerrar:hover {
+            background-color: #a30000;
         }
 
         .logo-container {
@@ -257,7 +242,7 @@
             font-weight: 600;
         }
 
-        /* --- ADAPTACIÓN EXCLUSIVA PARA CELULARES --- */
+        /* --- ADAPTACIÓN PARA CELULARES --- */
         @media (max-width: 768px) {
             .navbar {
                 padding: 10px 20px;
@@ -323,7 +308,7 @@
         </div>
     </div>
 
-    <!-- VENTANA FLOTANTE (MODAL) CON ANIMACIÓN PARA CELULARES -->
+    <!-- VENTANA FLOTANTE (MODAL) UNIVERSAL PARA CAMBIAR ESTADO -->
     <div id="modalEstado" class="modal-overlay">
         <div class="modal-content">
             <h3>Cambiar Estado</h3>
