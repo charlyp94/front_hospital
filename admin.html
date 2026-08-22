@@ -20,17 +20,11 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-
-            /* CAMBIO CLAVE: Ajustamos ancho y alto distintos para forzar el óvalo */
             width: 550px;
-            /* Más ancho */
             height: 480px;
-            /* Menos alto */
             border-radius: 50%;
-            /* Esto estira las esquinas convirtiéndolo en un óvalo */
             overflow: hidden;
-            /* Corta lo que quede fuera del óvalo si es necesario */
-            background-image: url('../img/logo.jpg');
+            background-image: url('logo.jpg');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -42,34 +36,59 @@
         /* Barra superior */
         .navbar {
             background: white;
-            padding: 15px 50px;
+            padding: 10px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .navbar img {
-            width: 50px;
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-img {
+            height: 60px;
+            width: 80px;
+            object-fit: contain;
+        }
+
+        .logo-texto h2 {
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #111111;
+            margin: 0;
+        }
+
+        .logo-texto p {
+            font-size: 0.75rem;
+            color: #555555;
+            font-weight: 600;
+            margin: 2px 0 0 0;
         }
 
         .nav-links {
             display: flex;
-            gap: 20px;
+            gap: 10px;
             font-weight: bold;
         }
-        /* Botón Volver estilizado abajo del contenedor */
+
+        /* Botón Volver estilizado */
         .btn-volver {
-            display: block;
-            width: 150px;
-            margin: 20px auto 50px auto;
-            padding: 12px;
+            display: inline-block;
+            padding: 8px 14px;
             background: #1e8449;
             color: white;
             text-align: center;
             text-decoration: none;
             border-radius: 6px;
             font-weight: bold;
+            font-size: 14px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background 0.2s ease;
         }
 
         .btn-volver:hover {
@@ -80,39 +99,52 @@
         .page-title {
             text-align: center;
             color: white;
-            padding: 40px 0;
+            padding: 25px 15px;
         }
 
         .page-title h1 {
             margin: 0;
-            font-size: 2.5em;
+            font-size: 1.8em;
         }
 
-        /* Contenedor de la tabla */
+        /* Contenedor de la tabla adaptativo */
         .table-container {
-            max-width: 1000px;
-            margin: 0 auto 50px auto;
+            max-width: 1100px;
+            width: 96%;
+            margin: 0 auto 30px auto;
             background: white;
-            padding: 30px;
+            padding: 15px 10px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+        }
+
+        /* Contenedor con scroll horizontal para celulares */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 750px; /* Asegura espacio suficiente para las 7 columnas */
         }
 
         th {
             background-color: #332126;
             color: white;
-            padding: 15px;
+            padding: 12px 10px;
+            font-size: 14px;
+            white-space: nowrap;
         }
 
         td {
             border-bottom: 1px solid #ddd;
-            padding: 15px;
+            padding: 12px 10px;
             text-align: center;
+            font-size: 13px;
         }
 
         /* Estilo del botón CAMBIAR */
@@ -125,11 +157,12 @@
             background-color: #09cf37;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 14px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
+            white-space: nowrap;
         }
 
         .dropdown-toggle:hover {
@@ -150,10 +183,11 @@
         }
 
         .dropdown-item {
-            padding: 12px;
+            padding: 10px 12px;
             display: block;
             cursor: pointer;
             color: #333;
+            font-size: 13px;
         }
 
         .dropdown-item:hover {
@@ -164,29 +198,34 @@
             background-color: #09cf37;
             color: white;
         }
-        .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
 
-.logo-img {
-    height: 90px;
-    width: 120px;
-}
-
-.logo-texto h2 {
-    font-size: 1.1rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    color: #111111;
-}
-
-.logo-texto p {
-    font-size: 0.8rem;
-    color: #555555;
-    font-weight: 600;
-}
+        /* --- MEDIA QUERIES PARA CELULARES --- */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 8px 12px;
+            }
+            .logo-img {
+                height: 45px;
+                width: 60px;
+            }
+            .logo-texto h2 {
+                font-size: 0.85rem;
+            }
+            .logo-texto p {
+                font-size: 0.65rem;
+            }
+            .page-title h1 {
+                font-size: 1.4em;
+            }
+            .table-container {
+                width: 98%;
+                padding: 10px 5px;
+            }
+            .btn-volver {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 
@@ -210,26 +249,28 @@
     </div>
 
     <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Fecha de Donación</th>
-                    <th>DNI</th>
-                    <th>Categoría</th>
-                    <th>Cantidad</th>
-                    <th>Estado Actual</th>
-                    <th>Cambiar Estado</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-donaciones"></tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Fecha de Donación</th>
+                        <th>DNI</th>
+                        <th>Categoría</th>
+                        <th>Cantidad</th>
+                        <th>Estado Actual</th>
+                        <th>Cambiar Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-donaciones"></tbody>
+            </table>
+        </div>
     </div>
 
     <!-- 1. Cargar primero el archivo de configuración global -->
     <script src="config.js"></script>
 
-    <!-- 2. Cargar después el script de administración (ajusta a admin_2.js si ese es tu nombre de archivo) -->
+    <!-- 2. Cargar después el script de administración -->
     <script src="admin.js"></script>
 </body>
 
