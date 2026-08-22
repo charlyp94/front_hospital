@@ -7,6 +7,65 @@
     <title>Donaciones - Hospital Luis A. Güemes</title>
     <link rel="icon" type="image/jpg" href="logo.jpg">
     <link rel="stylesheet" href="estilos.css">
+    
+    <!-- Estilos integrados para el menú hamburguesa responsivo sin romper tu diseño original -->
+    <style>
+        /* Botón hamburguesa oculto por defecto en computadoras */
+        .btn-menu-hamburguesa {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 24px;
+        }
+        .btn-menu-hamburguesa span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background-color: #333;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Reglas exclusivas para celulares (pantallas menores o iguales a 768px) */
+        @media (max-width: 768px) {
+            .navbar {
+                position: relative;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .btn-menu-hamburguesa {
+                display: flex;
+            }
+            /* El menú se oculta por defecto en móviles y se despliega al activarlo */
+            .navbar .menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                background-color: #ffffff;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                padding: 15px 0;
+                z-index: 1000;
+                text-align: center;
+            }
+            .navbar .menu.activo {
+                display: flex;
+            }
+            .navbar .menu a {
+                padding: 10px 0;
+                display: block;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -19,6 +78,14 @@
                 <p>A.O. III AGUARAY - SALTA</p>
             </div>
         </div>
+
+        <!-- Botón hamburguesa para dispositivos móviles -->
+        <button class="btn-menu-hamburguesa" id="btnHamburguesa" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
         <nav class="menu">
             <a href="#">Inicio</a>
             <a href="#destino-donaciones">Destino de Donaciones</a>
@@ -332,6 +399,27 @@
 
     <!-- 2. Cargamos el script principal ubicado en la raíz -->
     <script src="main.js"></script>
+
+    <!-- Script ligero para activar/desactivar el menú desplegable en celulares -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnHamburguesa = document.getElementById('btnHamburguesa');
+            const menu = document.querySelector('.navbar .menu');
+
+            if (btnHamburguesa && menu) {
+                btnHamburguesa.addEventListener('click', () => {
+                    menu.classList.toggle('activo');
+                });
+
+                // Cierra el menú automáticamente al hacer clic en cualquier opción (mejora la experiencia en móvil)
+                menu.querySelectorAll('a').forEach(enlace => {
+                    enlace.addEventListener('click', () => {
+                        menu.classList.remove('activo');
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
