@@ -18,7 +18,7 @@ async function cargarDonaciones() {
                     <td>${d.estado}</td>
                     <td>
                         <div class="dropdown-container">
-                            <button class="dropdown-toggle" onclick="toggleMenu(this)">CAMBIAR ▾</button>
+                            <button class="dropdown-toggle" onclick="manejarClickCambiar(${d.id}, '${d.estado}')">CAMBIAR ▾</button>
                             <div class="dropdown-menu">
                                 <span class="dropdown-item ${d.estado === 'Pendiente' ? 'selected' : ''}" onclick="cambiarEstadoMenu(${d.id}, 'Pendiente')">Pendiente</span>
                                 <span class="dropdown-item ${d.estado === 'Recibido' ? 'selected' : ''}" onclick="cambiarEstadoMenu(${d.id}, 'Recibido')">Recibido</span>
@@ -44,6 +44,7 @@ async function cambiarEstado(id, nuevoEstado) {
         });
 
         if (res.ok) {
+            cerrarModal();
             cargarDonaciones(); // Recargamos la tabla al terminar
         } else {
             alert('Error al actualizar el estado.');
@@ -53,10 +54,40 @@ async function cambiarEstado(id, nuevoEstado) {
     }
 }
 
-// --- Lógica del Menú Desplegable ---
+// --- Detección inteligente: Menú normal en PC o Ventana Flotante en Celular ---
+
+function manejarClickCambiar(id, estadoActual) {
+    // Si la pantalla es menor a 768px (Celular), abrimos el modal flotante
+    if (window.innerWidth <= 768) {
+        abrirModal(id, estadoActual);
+    } else {
+        // En PC, manejamos el despliegue normal de la tabla
+        event.stopPropagation();
+        const boton = event.target;
+        cerrarTodosLosMenus();
+        const menu = boton.nextElementSibling;
+        menu.style.display = 'block';
+    }
+}
+
+function abrirModal(id, estadoActual) {
+    const modalOpciones = document.getElementById('modalOpciones');
+    const estados = ['Pendiente', 'Recibido', 'Aprobado y Destinado'];
+
+    modalOpciones.innerHTML = estados.map(est => `
+        <button class="modal-btn ${estadoActual === est ? 'selected' : ''}" onclick="cambiarEstado(${id}, '${est}')">
+            ${est}
+        </button>
+    `).join('');
+
+    document.getElementById('modalEstado').style.display = 'flex';
+}
+
+function cerrarModal() {
+    document.getElementById('modalEstado').style.display = 'none';
+}
 
 function toggleMenu(button) {
-    // Cerramos todos los menús abiertos antes de abrir este
     cerrarTodosLosMenus();
     const menu = button.nextElementSibling;
     menu.style.display = 'block';
@@ -73,9 +104,9 @@ function cerrarTodosLosMenus() {
     });
 }
 
-// Cierra los menús si haces clic fuera
+// Cierra los menús si haces clic fuera (en PC)
 window.onclick = function (event) {
-    if (!event.target.matches('.dropdown-toggle')) {
+    if (!event.target.matches('.dropdown-toggle') && !event.target.closest('.modal-content')) {
         cerrarTodosLosMenus();
     }
 }

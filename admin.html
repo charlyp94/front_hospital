@@ -93,7 +93,6 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        /* Contenedor responsivo condicional solo actúa en pantallas chicas */
         .table-responsive {
             width: 100%;
         }
@@ -136,7 +135,7 @@
             background-color: #037b23;
         }
 
-        /* Menú desplegable corregido con z-index alto para celulares */
+        /* Menú desplegable para PC */
         .dropdown-menu {
             display: none;
             position: absolute;
@@ -165,6 +164,62 @@
             color: white;
         }
 
+        /* --- ESTILOS PARA LA VENTANA FLOTANTE (MODAL) EN CELULARES --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 320px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #4a2c35;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        .modal-btn.selected {
+            background-color: #09cf37;
+            color: white;
+        }
+
+        .modal-btn-cerrar {
+            background-color: #cc0000;
+            color: white;
+            margin-top: 15px;
+        }
+
         .logo-container {
             display: flex;
             align-items: center;
@@ -189,7 +244,7 @@
             font-weight: 600;
         }
 
-        /* --- ADAPTACIÓN EXCLUSIVA PARA CELULARES (NO AFECTA PC) --- */
+        /* --- ADAPTACIÓN EXCLUSIVA PARA CELULARES --- */
         @media (max-width: 768px) {
             .navbar {
                 padding: 10px 20px;
@@ -203,13 +258,12 @@
                 width: 95%;
                 margin: 0 auto 30px auto;
             }
-            /* Activamos el scroll horizontal solo en celulares para que no rompa la pantalla */
             .table-responsive {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
             }
             table {
-                min-width: 750px; /* Mantiene el tamaño original de la tabla para que no se amontone */
+                min-width: 750px;
             }
             th, td {
                 padding: 10px;
@@ -253,6 +307,15 @@
                 </thead>
                 <tbody id="tabla-donaciones"></tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- VENTANA FLOTANTE (MODAL) PARA CAMBIAR ESTADO EN CELULARES -->
+    <div id="modalEstado" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Cambiar Estado</h3>
+            <div id="modalOpciones"></div>
+            <button class="modal-btn modal-btn-cerrar" onclick="cerrarModal()">Cancelar</button>
         </div>
     </div>
 
