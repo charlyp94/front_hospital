@@ -122,17 +122,17 @@
             font-size: 13px;
         }
 
-        /* Fila interactiva para celulares */
+        /* Fila interactiva tanto para PC como para celulares */
         .fila-donacion {
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
 
         .fila-donacion:hover {
-            background-color: #f9f9f9;
+            background-color: #f1f1f1;
         }
 
-        /* --- VENTANA FLOTANTE (MODAL) CON ANIMACIÓN FLUIDA EN CELULARES --- */
+        /* --- VENTANA FLOTANTE (MODAL) CON ANIMACIÓN FLUIDA --- */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -292,7 +292,7 @@
 
     <a href="index.html" class="btn-volver">Volver al Inicio</a>
 
-    <!-- VENTANA FLOTANTE (MODAL) CON RESUMEN PARA CELULARES -->
+    <!-- VENTANA FLOTANTE (MODAL) CON RESUMEN -->
     <div id="modalResumen" class="modal-overlay">
         <div class="modal-content">
             <h3>Detalle de Donación</h3>
@@ -324,7 +324,6 @@
 
                 cuerpo.innerHTML = datos.map(d => {
                     const fechaFormateada = d.fecha ? new Date(d.fecha).toLocaleDateString('es-AR') : 'Sin fecha';
-                    // Convertimos los datos a formato seguro para pasarlos por la función al tocar la fila
                     const nombreSeguro = encodeURIComponent(d.nombre || '');
                     const categoriaSegura = encodeURIComponent(d.categoria || '');
                     const cantidadSegura = d.cantidad || 0;
@@ -346,23 +345,21 @@
             }
         }
 
-        // Lógica para abrir el resumen flotante solo en celulares (o pantallas menores a 768px)
+        // Lógica para abrir el resumen flotante tanto en PC como en celulares
         function manejarClickFila(nombre, fecha, categoria, cantidad) {
-            if (window.innerWidth <= 768) {
-                const contenido = document.getElementById('modalContenidoTexto');
-                contenido.innerHTML = `
-                    <div class="modal-detalle"><strong>Nombre:</strong> ${decodeURIComponent(nombre)}</div>
-                    <div class="modal-detalle"><strong>Fecha:</strong> ${fecha}</div>
-                    <div class="modal-detalle"><strong>Categoría:</strong> ${decodeURIComponent(categoria)}</div>
-                    <div class="modal-detalle"><strong>Cantidad:</strong> ${cantidad}</div>
-                `;
+            const contenido = document.getElementById('modalContenidoTexto');
+            contenido.innerHTML = `
+                <div class="modal-detalle"><strong>Nombre:</strong> ${decodeURIComponent(nombre)}</div>
+                <div class="modal-detalle"><strong>Fecha:</strong> ${fecha}</div>
+                <div class="modal-detalle"><strong>Categoría:</strong> ${decodeURIComponent(categoria)}</div>
+                <div class="modal-detalle"><strong>Cantidad:</strong> ${cantidad}</div>
+            `;
 
-                const modal = document.getElementById('modalResumen');
-                modal.style.display = 'flex';
-                setTimeout(() => {
-                    modal.classList.add('active');
-                }, 10);
-            }
+            const modal = document.getElementById('modalResumen');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
         }
 
         function cerrarModalResumen() {
