@@ -54,14 +54,12 @@ async function cambiarEstado(id, nuevoEstado) {
     }
 }
 
-// --- Detección inteligente: Menú normal en PC o Ventana Flotante en Celular ---
+// --- Detección inteligente: Menú normal en PC o Ventana Flotante con Animación en Celular ---
 
 function manejarClickCambiar(id, estadoActual) {
-    // Si la pantalla es menor a 768px (Celular), abrimos el modal flotante
     if (window.innerWidth <= 768) {
         abrirModal(id, estadoActual);
     } else {
-        // En PC, manejamos el despliegue normal de la tabla
         event.stopPropagation();
         const boton = event.target;
         cerrarTodosLosMenus();
@@ -80,11 +78,23 @@ function abrirModal(id, estadoActual) {
         </button>
     `).join('');
 
-    document.getElementById('modalEstado').style.display = 'flex';
+    const modal = document.getElementById('modalEstado');
+    modal.style.display = 'flex';
+    
+    // Activa la clase para disparar la animación suave de entrada
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
 }
 
 function cerrarModal() {
-    document.getElementById('modalEstado').style.display = 'none';
+    const modal = document.getElementById('modalEstado');
+    modal.classList.remove('active'); // Inicia la animación de salida
+    
+    // Espera a que termine la animación antes de ocultarlo por completo
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
 }
 
 function toggleMenu(button) {

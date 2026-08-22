@@ -164,7 +164,7 @@
             color: white;
         }
 
-        /* --- ESTILOS PARA LA VENTANA FLOTANTE (MODAL) EN CELULARES --- */
+        /* --- VENTANA FLOTANTE (MODAL) CON ANIMACIÓN FLUIDA EN CELULARES --- */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -176,6 +176,8 @@
             z-index: 999999;
             justify-content: center;
             align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .modal-content {
@@ -184,8 +186,19 @@
             border-radius: 12px;
             width: 85%;
             max-width: 320px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
         }
 
         .modal-content h3 {
@@ -310,7 +323,7 @@
         </div>
     </div>
 
-    <!-- VENTANA FLOTANTE (MODAL) PARA CAMBIAR ESTADO EN CELULARES -->
+    <!-- VENTANA FLOTANTE (MODAL) CON ANIMACIÓN PARA CELULARES -->
     <div id="modalEstado" class="modal-overlay">
         <div class="modal-content">
             <h3>Cambiar Estado</h3>
