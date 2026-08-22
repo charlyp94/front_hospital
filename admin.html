@@ -20,17 +20,11 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-
-            /* CAMBIO CLAVE: Ajustamos ancho y alto distintos para forzar el óvalo */
             width: 550px;
-            /* Más ancho */
             height: 480px;
-            /* Menos alto */
             border-radius: 50%;
-            /* Esto estira las esquinas convirtiéndolo en un óvalo */
             overflow: hidden;
-            /* Corta lo que quede fuera del óvalo si es necesario */
-            background-image: url('../img/logo.jpg');
+            background-image: url('logo.jpg');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -57,6 +51,7 @@
             gap: 20px;
             font-weight: bold;
         }
+
         /* Botón Volver estilizado abajo del contenedor */
         .btn-volver {
             display: block;
@@ -88,7 +83,7 @@
             font-size: 2.5em;
         }
 
-        /* Contenedor de la tabla */
+        /* Contenedor de la tabla original para PC */
         .table-container {
             max-width: 1000px;
             margin: 0 auto 50px auto;
@@ -96,6 +91,11 @@
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Contenedor responsivo condicional solo actúa en pantallas chicas */
+        .table-responsive {
+            width: 100%;
         }
 
         table {
@@ -136,16 +136,16 @@
             background-color: #037b23;
         }
 
-        /* Menú desplegable */
+        /* Menú desplegable corregido con z-index alto para celulares */
         .dropdown-menu {
             display: none;
             position: absolute;
             right: 0;
             background-color: white;
             min-width: 150px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             border-radius: 6px;
-            z-index: 1000;
+            z-index: 99999;
             text-align: left;
         }
 
@@ -164,29 +164,57 @@
             background-color: #09cf37;
             color: white;
         }
+
         .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-.logo-img {
-    height: 90px;
-    width: 120px;
-}
+        .logo-img {
+            height: 90px;
+            width: 120px;
+        }
 
-.logo-texto h2 {
-    font-size: 1.1rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    color: #111111;
-}
+        .logo-texto h2 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #111111;
+        }
 
-.logo-texto p {
-    font-size: 0.8rem;
-    color: #555555;
-    font-weight: 600;
-}
+        .logo-texto p {
+            font-size: 0.8rem;
+            color: #555555;
+            font-weight: 600;
+        }
+
+        /* --- ADAPTACIÓN EXCLUSIVA PARA CELULARES (NO AFECTA PC) --- */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 10px 20px;
+            }
+            .page-title h1 {
+                font-size: 1.8em;
+                padding: 0 10px;
+            }
+            .table-container {
+                padding: 15px;
+                width: 95%;
+                margin: 0 auto 30px auto;
+            }
+            /* Activamos el scroll horizontal solo en celulares para que no rompa la pantalla */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            table {
+                min-width: 750px; /* Mantiene el tamaño original de la tabla para que no se amontone */
+            }
+            th, td {
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 
@@ -201,7 +229,7 @@
             </div>
         </div>
         <div class="nav-links">
-            <a href="index.html" class="btn-volver">Volver al Inicio</a>
+            <a href="index.html" class="btn-volver" style="margin: 0; width: auto; padding: 10px 20px;">Volver al Inicio</a>
         </div>
     </div>
 
@@ -210,26 +238,28 @@
     </div>
 
     <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Fecha de Donación</th>
-                    <th>DNI</th>
-                    <th>Categoría</th>
-                    <th>Cantidad</th>
-                    <th>Estado Actual</th>
-                    <th>Cambiar Estado</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-donaciones"></tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Fecha de Donación</th>
+                        <th>DNI</th>
+                        <th>Categoría</th>
+                        <th>Cantidad</th>
+                        <th>Estado Actual</th>
+                        <th>Cambiar Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-donaciones"></tbody>
+            </table>
+        </div>
     </div>
 
     <!-- 1. Cargar primero el archivo de configuración global -->
     <script src="config.js"></script>
 
-    <!-- 2. Cargar después el script de administración (ajusta a admin_2.js si ese es tu nombre de archivo) -->
+    <!-- 2. Cargar después el script de administración -->
     <script src="admin.js"></script>
 </body>
 
