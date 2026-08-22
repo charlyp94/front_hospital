@@ -8,7 +8,7 @@
     <link rel="icon" type="image/jpg" href="logo.jpg">
     <link rel="stylesheet" href="estilos.css">
     
-    <!-- Estilos mejorados para el menú hamburguesa elegante y animado -->
+    <!-- Estilos mejorados para el menú hamburguesa y adaptación responsiva absoluta del formulario -->
     <style>
         /* Botón hamburguesa elegante */
         .btn-menu-hamburguesa {
@@ -36,7 +36,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Animación de transformación del botón a una "X" sutil cuando está activo */
+        /* Animación del botón a una "X" sutil */
         .btn-menu-hamburguesa.activo span:nth-child(1) {
             transform: translateY(7px) rotate(45deg);
         }
@@ -58,7 +58,7 @@
             .btn-menu-hamburguesa {
                 display: flex;
             }
-            /* Menú oculto inicialmente con animación suave de bajada y opacidad */
+            /* Menú desplegable animado para móvil */
             .navbar .menu {
                 display: flex;
                 flex-direction: column;
@@ -81,7 +81,6 @@
                             transform 0.3s ease, 
                             padding 0.3s ease;
             }
-            /* Estado activo con despliegue fluido y elegante */
             .navbar .menu.activo {
                 max-height: 350px;
                 opacity: 1;
@@ -98,6 +97,62 @@
             }
             .navbar .menu a:hover {
                 background-color: #f8f9fa;
+            }
+
+            /* --- OPTIMIZACIÓN ABSOLUTA DEL FORMULARIO Y MODAL PARA MÓVIL --- */
+            .modal-overlay {
+                padding: 10px !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .modal-content, 
+            div[id*="modal"] > div {
+                width: 95% !important;
+                max-width: 95% !important;
+                margin: 0 auto !important;
+                padding: 18px 14px !important;
+                max-height: 90vh !important;
+                overflow-y: auto !important;
+                box-sizing: border-box !important;
+            }
+            
+            /* Forzar que cualquier fila de inputs pase a una sola columna vertical */
+            .form-row, 
+            #camposPersona .form-row, 
+            #contenedorDatosIdentidad .form-row {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 0 !important;
+                width: 100% !important;
+            }
+
+            /* Asegurar que los elementos internos ocupen todo el ancho disponible */
+            .form-grupo, 
+            .modal-content input, 
+            .modal-content select, 
+            .modal-content textarea {
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            /* Tamaños de fuente táctiles y seguros para evitar zoom forzado en iOS/Android */
+            .modal-content input[type="text"],
+            .modal-content input[type="email"],
+            .modal-content input[type="date"],
+            .modal-content input[type="number"],
+            .modal-content select {
+                font-size: 16px !important;
+                padding: 12px !important;
+                height: auto !important;
+            }
+
+            /* Botón de envío grande y cómodo para el dedo */
+            .btn-enviar, .modal-content button[type="submit"] {
+                width: 100% !important;
+                padding: 14px !important;
+                font-size: 16px !important;
+                margin-top: 10px !important;
             }
         }
     </style>
@@ -429,13 +484,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-    <!-- 1. Cargamos el archivo de configuración global -->
+    <!-- 1. Configuración global -->
     <script src="config.js"></script>
 
-    <!-- 2. Cargamos el script principal ubicado en la raíz -->
+    <!-- 2. Script principal -->
     <script src="main.js"></script>
 
-    <!-- Script de control para la animación fluida del menú hamburguesa -->
+    <!-- Script de control para el menú hamburguesa -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnHamburguesa = document.getElementById('btnHamburguesa');
@@ -447,7 +502,6 @@
                     btnHamburguesa.classList.toggle('activo');
                 });
 
-                // Cierra el menú suavemente al hacer clic en cualquier opción
                 menu.querySelectorAll('a').forEach(enlace => {
                     enlace.addEventListener('click', () => {
                         menu.classList.remove('activo');
