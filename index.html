@@ -332,13 +332,13 @@
                     <div id="camposPersona" class="seccion-dinamica">
                         <div class="form-grupo">
                             <label for="nombreCompleto">Nombre Completo</label>
-                            <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Ej: Juan Pérez"
-                                required>
+                            <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Ej: Juan Pérez" 
+       required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Por favor, ingresa solo letras y espacios.">
                         </div>
                         <div class="form-row">
                             <div class="form-grupo">
                                 <label for="dni">DNI</label>
-                                <input type="text" id="dni" name="dni" placeholder="Ej: 38123456" required>
+                                <input type="text" id="dni" name="dni" placeholder="Ej: 38123456" required pattern="[0-9]{8}" title="Por favor, ingresa un DNI válido de 8 dígitos.">
                             </div>
                             <div class="form-grupo">
                                 <label for="fechaNacimiento">Fecha de Nacimiento</label>
@@ -361,7 +361,7 @@
                         <div class="form-grupo">
                             <label for="nombreEmpresa">Nombre / Razón Social de la Empresa</label>
                             <input type="text" id="nombreEmpresa" name="nombreEmpresa"
-                                placeholder="Ej: Distribuidora Norte S.A.">
+                                placeholder="Ej: Distribuidora Norte S.A." required pattern="[A-Za-z0-9\s]+" title="Por favor, ingresa solo letras, números y espacios.">
                         </div>
                     </div>
 
@@ -372,7 +372,7 @@
                         </div>
                         <div class="form-grupo" style="flex: 1;">
                             <label for="telefono">Teléfono de Contacto</label>
-                            <input type="text" id="telefono" name="telefono" placeholder="Ej: 3873123456" required>
+                            <input type="text" id="telefono" name="telefono" placeholder="Ej: 3873123456" required pattern="[0-9]{10}" title="Por favor, ingresa un número de teléfono válido de 10 dígitos.">
                         </div>
                     </div>
                 </div>
