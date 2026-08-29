@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const formDonacion = document.getElementById('formDonacion');
 
     const checkAnonimo = document.getElementById('checkAnonimo');
+    const nombreCompletoInput = document.getElementById('nombreCompleto');
+    const dniInput = document.getElementById('dni');
+    const telefonoInput = document.getElementById('telefono');
 
     // --- 2. LÓGICA DE APERTURA Y CIERRE DEL MODAL ---
     if (btnAbrirModal) {
@@ -53,19 +56,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('nombreEmpresa').value = '';
                 document.getElementById('nombreEmpresa').removeAttribute('required');
             }
-            if (document.getElementById('nombreCompleto')) document.getElementById('nombreCompleto').setAttribute('required', 'true');
-            if (document.getElementById('dni')) document.getElementById('dni').setAttribute('required', 'true');
+            if (nombreCompletoInput) {
+                nombreCompletoInput.setAttribute('required', 'true');
+                nombreCompletoInput.disabled = false;
+            }
+            if (dniInput) dniInput.setAttribute('required', 'true');
             if (document.getElementById('genero')) document.getElementById('genero').setAttribute('required', 'true');
         } else if (radioEmpresa.checked) {
             camposEmpresa.style.display = 'block';
             camposPersona.style.display = 'none';
-            if (document.getElementById('nombreCompleto')) {
-                document.getElementById('nombreCompleto').value = '';
-                document.getElementById('nombreCompleto').removeAttribute('required');
+            if (nombreCompletoInput) {
+                nombreCompletoInput.value = '';
+                nombreCompletoInput.removeAttribute('required');
+                nombreCompletoInput.disabled = false;
             }
-            if (document.getElementById('dni')) {
-                document.getElementById('dni').value = '';
-                document.getElementById('dni').removeAttribute('required');
+            if (dniInput) {
+                dniInput.value = '';
+                dniInput.removeAttribute('required');
             }
             if (document.getElementById('fechaNacimiento')) document.getElementById('fechaNacimiento').value = '';
             if (document.getElementById('genero')) {
@@ -80,10 +87,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('genero')) document.getElementById('genero').setAttribute('required', 'true');
     }
 
+    // --- MANEJO DEL CHECKBOX ANÓNIMO ---
+    if (checkAnonimo) {
+        checkAnonimo.addEventListener('change', () => {
+            const esAnonimo = checkAnonimo.checked;
+            if (nombreCompletoInput && radioPersona.checked) {
+                nombreCompletoInput.disabled = esAnonimo;
+                if (esAnonimo) nombreCompletoInput.value = '';
+            }
+        });
+    }
+
     // --- 4. ENVÍO DE DATOS Y GENERACIÓN DEL COMPROBANTE PDF ---
     if (formDonacion) {
         formDonacion.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Validación en JavaScript de DNI y Teléfono numéricos
+            const telefonoVal = telefonoInput ? telefonoInput.value.trim() : '';
+            if (telefonoVal && !/^\d+$/.test(telefonoVal)) {
+                Swal.fire('Error', 'El teléfono de contacto debe contener únicamente números.', 'error');
+                return;
+            }
+
+            if (radioPersona.checked && !checkAnonimo.checked) {
+                const dniVal = dniInput ? dniInput.value.trim() : '';
+                if (dniVal && !/^\d+$/.test(dniVal)) {
+                    Swal.fire('Error', 'El DNI debe contener únicamente números.', 'error');
+                    return;
+                }
+            }
 
             const correoInput = document.getElementById('correo').value;
             try {
@@ -131,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const datosDonacion = {
                 tipoDonante: tipoDonante,
-                nombreCompleto: document.getElementById('nombreCompleto')?.value || '',
+                nombreCompleto: ocultarNombreWeb ? 'Anónimo' : (document.getElementById('nombreCompleto')?.value || ''),
                 nombreEmpresa: document.getElementById('nombreEmpresa')?.value || '',
                 dni: document.getElementById('dni')?.value || null,
                 fechaNacimiento: document.getElementById('fechaNacimiento')?.value || null,
@@ -281,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     formDonacion.reset();
+                    if (nombreCompletoInput) nombreCompletoInput.disabled = false;
                     alternarCamposFormulario();
                     cerrarModal();
 
@@ -360,7 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // HISTORIAL PÚBLICO
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    const btnVerHistorial = document.getElementById('btnVerHistorial');
+    // Vinculado tanto al botón del menú de navegación (id="menuHistorial") como a cualquier otro selector alternativo si existiese
+    const btnVerHistorial = document.getElementById('menuHistorial') || document.getElementById('btnVerHistorial');
     const modalHistorial = document.getElementById('modalHistorial');
     const btnCerrarHistorial = document.getElementById('btnCerrarHistorial');
     const tablaHistorialCuerpo = document.getElementById('tablaHistorialCuerpo');
@@ -368,10 +403,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnVerHistorial) {
         btnVerHistorial.style.transition = 'filter 0.3s ease, background-color 0.3s ease';
         btnVerHistorial.style.cursor = 'pointer';
-        btnVerHistorial.addEventListener('mouseover', () => { btnVerHistorial.style.filter = 'brightness(85%)'; });
-        btnVerHistorial.addEventListener('mouseout', () => { btnVerHistorial.style.filter = 'brightness(100%)'; });
-        btnVerHistorial.addEventListener('click', () => {
-            modalHistorial.style.display = 'flex';
+        btnVerHistorial.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (modalHistorial) modalHistorial.style.display = 'flex';
             cargarHistorialPublico();
         });
     }
