@@ -118,6 +118,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            // --- VALIDACIÓN OBLIGATORIA DE CATEGORÍAS ---
+            const checkboxes = document.querySelectorAll('input[name="categorias"]:checked');
+            
+            if (checkboxes.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Categoría requerida',
+                    text: 'Por favor, seleccione al menos un tipo de insumo o categoría para la donación.',
+                    confirmButtonColor: '#4a2c35'
+                });
+                return; // Detiene el envío si no hay ninguna tildada
+            }
+
+            const categoriasSeleccionadas = Array.from(checkboxes).map(cb => {
+                return cb.parentNode.querySelector('span')?.innerText || cb.value;
+            });
+
+            const categoriaFinal = categoriasSeleccionadas.join(', ');
+
             const correoInput = document.getElementById('correo').value;
             try {
                 const checkRes = await fetch(`${CONFIG.API_BASE_URL}/donaciones/verificar?correo=${correoInput}`);
@@ -155,13 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const generoSelect = document.getElementById('genero')?.value || null;
             const ocultarNombreWeb = checkAnonimo ? checkAnonimo.checked : false;
 
-            const checkboxes = document.querySelectorAll('input[name="categorias"]:checked');
-            const categoriasSeleccionadas = Array.from(checkboxes).map(cb => {
-                return cb.parentNode.querySelector('span')?.innerText || cb.value;
-            });
-
-            const categoriaFinal = categoriasSeleccionadas.length > 0 ? categoriasSeleccionadas.join(', ') : 'General';
-
             const datosDonacion = {
                 tipoDonante: tipoDonante,
                 nombreCompleto: ocultarNombreWeb ? 'Anónimo' : (document.getElementById('nombreCompleto')?.value || ''),
@@ -177,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const respuesta = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones`, {
+                const respuesta = await fetch(`${CONFIG.API_BASE_URL}/donaciones`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosDonacion)
@@ -361,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 inputValidator: (value) => { if (!value) return '¡Por favor, ingrese la clave de seguridad!'; }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`https://back-hospital-euk1.onrender.com/api/verificar-acceso`, {
+                    fetch(`${CONFIG.API_BASE_URL}/verificar-acceso`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ clave: result.value })
@@ -394,7 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // HISTORIAL PÚBLICO
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Vinculado tanto al botón del menú de navegación (id="menuHistorial") como a cualquier otro selector alternativo si existiese
     const btnVerHistorial = document.getElementById('menuHistorial') || document.getElementById('btnVerHistorial');
     const modalHistorial = document.getElementById('modalHistorial');
     const btnCerrarHistorial = document.getElementById('btnCerrarHistorial');
@@ -422,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (!tablaHistorialCuerpo) return;
             tablaHistorialCuerpo.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Cargando historial...</td></tr>';
-            const respuesta = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/aprobadas`);
+            const respuesta = await fetch(`${CONFIG.API_BASE_URL}/donaciones/aprobadas`);
             const donaciones = await respuesta.json();
             tablaHistorialCuerpo.innerHTML = '';
             if (donaciones.length === 0) {
