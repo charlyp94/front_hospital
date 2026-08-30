@@ -85,7 +85,21 @@ document.addEventListener('DOMContentLoaded', () => {
         formDonacion.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Validación obligatoria de al menos una categoría seleccionada
+            const checkboxes = document.querySelectorAll('input[name="categorias"]:checked');
+            if (checkboxes.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Categoría requerida',
+                    text: 'Por favor, seleccioná al menos una categoría de donación.',
+                    confirmButtonColor: '#4a2c35'
+                });
+                return;
+            }
+
             const correoInput = document.getElementById('correo').value;
+            
+            // Verificación previa usando CONFIG.API_BASE_URL para evitar errores de conexión
             try {
                 const checkRes = await fetch(`${CONFIG.API_BASE_URL}/donaciones/verificar?correo=${correoInput}`);
                 const status = await checkRes.json();
@@ -112,7 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
             } catch (err) {
-                console.error("Error al validar:", err);
+                console.error("Error al validar con el servidor:", err);
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sin Conexión',
+                    text: 'No se pudo conectar con el servidor para validar el estado.',
+                    confirmButtonColor: '#4a2c35'
+                });
+                return;
             }
 
             const tipoDonante = radioPersona.checked ? 'persona' : 'empresa';
@@ -122,12 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const generoSelect = document.getElementById('genero')?.value || null;
             const ocultarNombreWeb = checkAnonimo ? checkAnonimo.checked : false;
 
-            const checkboxes = document.querySelectorAll('input[name="categorias"]:checked');
             const categoriasSeleccionadas = Array.from(checkboxes).map(cb => {
                 return cb.parentNode.querySelector('span')?.innerText || cb.value;
             });
 
-            const categoriaFinal = categoriasSeleccionadas.length > 0 ? categoriasSeleccionadas.join(', ') : 'General';
+            const categoriaFinal = categoriasSeleccionadas.join(', ');
 
             const datosDonacion = {
                 tipoDonante: tipoDonante,
@@ -144,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const respuesta = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones`, {
+                const respuesta = await fetch(`${CONFIG.API_BASE_URL}/donaciones`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosDonacion)
@@ -327,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 inputValidator: (value) => { if (!value) return '¡Por favor, ingrese la clave de seguridad!'; }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`https://back-hospital-euk1.onrender.com/api/verificar-acceso`, {
+                    fetch(`${CONFIG.API_BASE_URL}/verificar-acceso`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ clave: result.value })
@@ -360,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // HISTORIAL PÚBLICO
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    const btnVerHistorial = document.getElementById('btnVerHistorial');
+    const btnVerHistorial = document.getElementById('menuHistorial'); // Adaptado al id correcto del HTML
     const modalHistorial = document.getElementById('modalHistorial');
     const btnCerrarHistorial = document.getElementById('btnCerrarHistorial');
     const tablaHistorialCuerpo = document.getElementById('tablaHistorialCuerpo');
@@ -370,9 +390,13 @@ document.addEventListener('DOMContentLoaded', () => {
         btnVerHistorial.style.cursor = 'pointer';
         btnVerHistorial.addEventListener('mouseover', () => { btnVerHistorial.style.filter = 'brightness(85%)'; });
         btnVerHistorial.addEventListener('mouseout', () => { btnVerHistorial.style.filter = 'brightness(100%)'; });
-        btnVerHistorial.addEventListener('click', () => {
-            modalHistorial.style.display = 'flex';
-            cargarHistorialPublico();
+        btnVerHistorial.addEventListener('click', (e) => {
+            // Si el enlace apunta a una página y querés abrir el modal, previene el salto por defecto:
+            if (modalHistorial) {
+                e.preventDefault();
+                modalHistorial.style.display = 'flex';
+                cargarHistorialPublico();
+            }
         });
     }
 
@@ -388,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (!tablaHistorialCuerpo) return;
             tablaHistorialCuerpo.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Cargando historial...</td></tr>';
-            const respuesta = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/aprobadas`);
+            const respuesta = await fetch(`${CONFIG.API_BASE_URL}/donaciones/aprobadas`);
             const donaciones = await respuesta.json();
             tablaHistorialCuerpo.innerHTML = '';
             if (donaciones.length === 0) {

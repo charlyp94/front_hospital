@@ -338,7 +338,7 @@
                         <div class="form-row">
                             <div class="form-grupo">
                                 <label for="dni">DNI</label>
-                                <input type="text" id="dni" name="dni" placeholder="Ej: 38123456" required>
+                                <input type="text" id="dni" name="dni" placeholder="Ej: 38123456" maxlength="8" required>
                             </div>
                             <div class="form-grupo">
                                 <label for="fechaNacimiento">Fecha de Nacimiento</label>
@@ -372,7 +372,7 @@
                         </div>
                         <div class="form-grupo" style="flex: 1;">
                             <label for="telefono">Teléfono de Contacto</label>
-                            <input type="text" id="telefono" name="telefono" placeholder="Ej: 3873123456" required>
+                            <input type="text" id="telefono" name="telefono" placeholder="Ej: 3873123456" maxlength="15" required>
                         </div>
                     </div>
                 </div>
@@ -464,7 +464,7 @@
     <!-- 2. Script principal -->
     <script src="main.js"></script>
 
-    <!-- Script de control para el menú hamburguesa -->
+    <!-- Script de control para el menú hamburguesa y validaciones de inputs -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnHamburguesa = document.getElementById('btnHamburguesa');
@@ -482,6 +482,37 @@
                         btnHamburguesa.classList.remove('activo');
                     });
                 });
+            }
+
+            // --- VALIDACIONES DE CAMPOS ---
+            const inputNombre = document.getElementById('nombreCompleto');
+            const inputEmpresa = document.getElementById('nombreEmpresa');
+            const inputDni = document.getElementById('dni');
+            const inputTelefono = document.getElementById('telefono');
+
+            // Solo letras y espacios en nombres
+            function validarSoloLetras(e) {
+                e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+            }
+
+            // Solo números y límite de longitud
+            function validarSoloNumeros(e, maxLength) {
+                let valor = e.target.value.replace(/\D/g, '');
+                if (maxLength && valor.length > maxLength) {
+                    valor = valor.slice(0, maxLength);
+                }
+                e.target.value = valor;
+            }
+
+            if (inputNombre) inputNombre.addEventListener('input', validarSoloLetras);
+            if (inputEmpresa) inputEmpresa.addEventListener('input', validarSoloLetras);
+            
+            if (inputDni) {
+                inputDni.addEventListener('input', (e) => validarSoloNumeros(e, 8)); // DNI de hasta 8 dígitos
+            }
+            
+            if (inputTelefono) {
+                inputTelefono.addEventListener('input', (e) => validarSoloNumeros(e, 15)); // Teléfono de hasta 15 dígitos
             }
         });
     </script>
