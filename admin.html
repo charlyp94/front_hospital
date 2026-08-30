@@ -192,11 +192,13 @@
             cursor: pointer;
             background-color: #f1f1f1;
             color: #333;
-            transition: background-color 0.2s ease;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
-        .modal-btn:hover {
-            background-color: #e2e2e2;
+        /* 🟢 EFECTO VERDE AL PASAR EL CURSOR SOBRE BOTONES DISPONIBLES */
+        .modal-btn:not(:disabled):hover {
+            background-color: #28a745 !important;
+            color: #ffffff !important;
         }
 
         .modal-btn.selected {
