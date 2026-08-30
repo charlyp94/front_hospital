@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 2. LÓGICA DE APERTURA Y CIERRE DEL MODAL ---
     if (btnAbrirModal) {
         btnAbrirModal.addEventListener('click', () => {
-            modal.classList.add('mostrar');
+            if (modal) modal.classList.add('mostrar');
             document.body.style.overflow = 'hidden';
         });
     }
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function cerrarModal() {
-        modal.classList.remove('mostrar');
+        if (modal) modal.classList.remove('mostrar');
         document.body.style.overflow = 'auto';
     }
 
@@ -46,9 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function alternarCamposFormulario() {
+        if (!radioPersona || !radioEmpresa) return;
+
         if (radioPersona.checked) {
-            camposPersona.style.display = 'block';
-            camposEmpresa.style.display = 'none';
+            if (camposPersona) camposPersona.style.display = 'block';
+            if (camposEmpresa) camposEmpresa.style.display = 'none';
             if (document.getElementById('nombreEmpresa')) {
                 document.getElementById('nombreEmpresa').value = '';
                 document.getElementById('nombreEmpresa').removeAttribute('required');
@@ -57,8 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('dni')) document.getElementById('dni').setAttribute('required', 'true');
             if (document.getElementById('genero')) document.getElementById('genero').setAttribute('required', 'true');
         } else if (radioEmpresa.checked) {
-            camposEmpresa.style.display = 'block';
-            camposPersona.style.display = 'none';
+            if (camposEmpresa) camposEmpresa.style.display = 'block';
+            if (camposPersona) camposPersona.style.display = 'none';
             if (document.getElementById('nombreCompleto')) {
                 document.getElementById('nombreCompleto').value = '';
                 document.getElementById('nombreCompleto').removeAttribute('required');
@@ -85,14 +87,16 @@ document.addEventListener('DOMContentLoaded', () => {
         formDonacion.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const correoInput = document.getElementById('correo').value;
+            const correoInput = document.getElementById('correo')?.value || '';
+            
+            // Validación previa de donación pendiente
             try {
-                const checkRes = await fetch(`${CONFIG.API_BASE_URL}/donaciones/verificar?correo=${correoInput}`);
+                const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : 'https://back-hospital-euk1.onrender.com';
+                const checkRes = await fetch(`${apiBase}/donaciones/verificar?correo=${encodeURIComponent(correoInput)}`);
                 const status = await checkRes.json();
 
                 if (status.tienePendiente) {
-                    modal.classList.remove('mostrar');
-                    document.body.style.overflow = 'auto';
+                    cerrarModal();
 
                     setTimeout(() => {
                         Swal.fire({
@@ -115,9 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Error al validar:", err);
             }
 
-            const tipoDonante = radioPersona.checked ? 'persona' : 'empresa';
-            const correo = document.getElementById('correo').value;
-            const telefono = document.getElementById('telefono').value;
+            const tipoDonante = radioPersona && radioPersona.checked ? 'persona' : 'empresa';
+            const correo = document.getElementById('correo')?.value || '';
+            const telefono = document.getElementById('telefono')?.value || '';
             const cantidad = document.getElementById('cantidad')?.value || 0;
             const generoSelect = document.getElementById('genero')?.value || null;
             const ocultarNombreWeb = checkAnonimo ? checkAnonimo.checked : false;
@@ -288,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Swal.fire({
                         icon: 'error',
                         title: 'No se puede procesar',
-                        text: resultado.error,
+                        text: resultado.error || 'Ocurrió un error inesperado.',
                         confirmButtonColor: '#4a2c35'
                     });
                 }
@@ -371,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnVerHistorial.addEventListener('mouseover', () => { btnVerHistorial.style.filter = 'brightness(85%)'; });
         btnVerHistorial.addEventListener('mouseout', () => { btnVerHistorial.style.filter = 'brightness(100%)'; });
         btnVerHistorial.addEventListener('click', () => {
-            modalHistorial.style.display = 'flex';
+            if (modalHistorial) modalHistorial.style.display = 'flex';
             cargarHistorialPublico();
         });
     }
@@ -381,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addEventListener('click', (e) => {
-        if (e.target === modalHistorial) modalHistorial.style.display = 'none';
+        if (modalHistorial && e.target === modalHistorial) modalHistorial.style.display = 'none';
     });
 
     async function cargarHistorialPublico() {
@@ -391,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const respuesta = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/aprobadas`);
             const donaciones = await respuesta.json();
             tablaHistorialCuerpo.innerHTML = '';
-            if (donaciones.length === 0) {
+            if (!donaciones || donaciones.length === 0) {
                 tablaHistorialCuerpo.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#666;">Aún no hay donaciones aprobadas.</td></tr>';
                 return;
             }

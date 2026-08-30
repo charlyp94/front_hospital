@@ -333,12 +333,13 @@
                         <div class="form-grupo">
                             <label for="nombreCompleto">Nombre Completo</label>
                             <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Ej: Juan Pérez"
-                                required>
+                                pattern="[A-Za-zÀ-ÿ\s]+" title="El nombre solo debe contener letras y espacios" required>
                         </div>
                         <div class="form-row">
                             <div class="form-grupo">
                                 <label for="dni">DNI</label>
-                                <input type="text" id="dni" name="dni" placeholder="Ej: 38123456" required>
+                                <input type="text" id="dni" name="dni" placeholder="Ej: 38123456" 
+                                    inputmode="numeric" pattern="[0-9]{7,8}" title="Ingrese un DNI válido de 7 u 8 dígitos numéricos" required>
                             </div>
                             <div class="form-grupo">
                                 <label for="fechaNacimiento">Fecha de Nacimiento</label>
@@ -361,7 +362,7 @@
                         <div class="form-grupo">
                             <label for="nombreEmpresa">Nombre / Razón Social de la Empresa</label>
                             <input type="text" id="nombreEmpresa" name="nombreEmpresa"
-                                placeholder="Ej: Distribuidora Norte S.A.">
+                                placeholder="Ej: Distribuidora Norte S.A." pattern="[A-Za-zÀ-ÿ0-9\s\.\,\-]+">
                         </div>
                     </div>
 
@@ -372,7 +373,8 @@
                         </div>
                         <div class="form-grupo" style="flex: 1;">
                             <label for="telefono">Teléfono de Contacto</label>
-                            <input type="text" id="telefono" name="telefono" placeholder="Ej: 3873123456" required>
+                            <input type="text" id="telefono" name="telefono" placeholder="Ej: 3873123456" 
+                                inputmode="tel" pattern="[0-9]+" title="El teléfono debe contener únicamente números" required>
                         </div>
                     </div>
                 </div>
@@ -464,7 +466,7 @@
     <!-- 2. Script principal -->
     <script src="main.js"></script>
 
-    <!-- Script de control para el menú hamburguesa -->
+    <!-- Script de control para el menú hamburguesa y validaciones adicionales -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnHamburguesa = document.getElementById('btnHamburguesa');
@@ -481,6 +483,57 @@
                         menu.classList.remove('activo');
                         btnHamburguesa.classList.remove('activo');
                     });
+                });
+            }
+
+            // Validación en tiempo real para evitar números en campos de texto de nombre
+            const inputNombre = document.getElementById('nombreCompleto');
+            if (inputNombre) {
+                inputNombre.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '');
+                });
+            }
+
+            const inputEmpresa = document.getElementById('nombreEmpresa');
+            if (inputEmpresa) {
+                inputEmpresa.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ0-9\s\.\,\-]/g, '');
+                });
+            }
+
+            // Restricción para que DNI y Teléfono acepten exclusivamente números
+            const inputDni = document.getElementById('dni');
+            if (inputDni) {
+                inputDni.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
+                });
+            }
+
+            const inputTel = document.getElementById('telefono');
+            if (inputTel) {
+                inputTel.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+            }
+
+            // Validación estricta antes de enviar el formulario de donaciones
+            const formDonacion = document.getElementById('formDonacion');
+            if (formDonacion) {
+                formDonacion.addEventListener('submit', (e) => {
+                    const categoriasMarcadas = formDonacion.querySelectorAll('input[name="categorias"]:checked');
+                    if (categoriasMarcadas.length === 0) {
+                        e.preventDefault();
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Categoría requerida',
+                                text: 'Por favor, seleccioná al menos una categoría de donación antes de continuar.',
+                                confirmButtonColor: '#2c3e50'
+                            });
+                        } else {
+                            alert('Por favor, seleccioná al menos una categoría de donación.');
+                        }
+                    }
                 });
             }
         });
