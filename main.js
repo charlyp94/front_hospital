@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     text: 'Por favor, seleccione al menos un tipo de insumo o categoría para la donación.',
                     confirmButtonColor: '#4a2c35'
                 });
-                return; // Detiene el envío si no hay ninguna tildada
+                return; 
             }
 
             const categoriasSeleccionadas = Array.from(checkboxes).map(cb => {
@@ -138,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const categoriaFinal = categoriasSeleccionadas.join(', ');
 
             const correoInput = document.getElementById('correo').value;
+            
             try {
                 const checkRes = await fetch(`${CONFIG.API_BASE_URL}/donaciones/verificar?correo=${correoInput}`);
                 const status = await checkRes.json();
@@ -164,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
             } catch (err) {
-                console.error("Error al validar:", err);
+                console.error("Error al validar pendiente:", err);
             }
 
             const tipoDonante = radioPersona.checked ? 'persona' : 'empresa';
@@ -334,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Swal.fire({
                         icon: 'error',
                         title: 'No se puede procesar',
-                        text: resultado.error,
+                        text: resultado.error || 'Ocurrió un error inesperado.',
                         confirmButtonColor: '#4a2c35'
                     });
                 }
