@@ -96,7 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (inputEmpresa) {
         inputEmpresa.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ0-9\s\.\,\-]/g, '');
+            // Modificado para bloquear estrictamente los números (se removió el 0-9)
+            e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s\.\,\-]/g, '');
         });
     }
 
