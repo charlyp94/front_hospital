@@ -82,6 +82,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById('genero')) document.getElementById('genero').setAttribute('required', 'true');
     }
 
+    // --- RESTRICCIONES Y FILTROS DE ENTRADA (VALIDACIONES EN VIVO) ---
+    const inputNombre = document.getElementById('nombreCompleto');
+    const inputEmpresa = document.getElementById('nombreEmpresa');
+    const inputDni = document.getElementById('dni');
+    const inputTel = document.getElementById('telefono');
+
+    if (inputNombre) {
+        inputNombre.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '');
+        });
+    }
+
+    if (inputEmpresa) {
+        inputEmpresa.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ0-9\s\.\,\-]/g, '');
+        });
+    }
+
+    if (inputDni) {
+        inputDni.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
+        });
+    }
+
+    if (inputTel) {
+        inputTel.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    }
+
     // --- 4. ENVÍO DE DATOS Y GENERACIÓN DEL COMPROBANTE PDF ---
     if (formDonacion) {
         formDonacion.addEventListener('submit', async (e) => {
