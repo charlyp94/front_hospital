@@ -130,10 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             const correoInput = document.getElementById('correo')?.value || '';
+            const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : 'https://back-hospital-euk1.onrender.com';
             
             // 🔒 Validación previa de donación pendiente por correo
             try {
-                const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : 'https://back-hospital-euk1.onrender.com';
                 const checkRes = await fetch(`${apiBase}/donaciones/verificar?correo=${encodeURIComponent(correoInput)}`);
                 const status = await checkRes.json();
 
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const respuesta = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones`, {
+                const respuesta = await fetch(`${apiBase}/api/donaciones`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosDonacion)
@@ -363,6 +363,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
     const btnPersonal = document.getElementById('btnAccesoPersonal');
+    const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : 'https://back-hospital-euk1.onrender.com';
+
     if (btnPersonal) {
         btnPersonal.addEventListener('click', (e) => {
             e.preventDefault();
@@ -380,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 inputValidator: (value) => { if (!value) return '¡Por favor, ingrese la clave de seguridad!'; }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`https://back-hospital-euk1.onrender.com/api/verificar-acceso`, {
+                    fetch(`${apiBase}/api/verificar-acceso`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ clave: result.value })
@@ -417,6 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalHistorial = document.getElementById('modalHistorial');
     const btnCerrarHistorial = document.getElementById('btnCerrarHistorial');
     const tablaHistorialCuerpo = document.getElementById('tablaHistorialCuerpo');
+    const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : 'https://back-hospital-euk1.onrender.com';
 
     if (btnVerHistorial) {
         btnVerHistorial.style.transition = 'filter 0.3s ease, background-color 0.3s ease';
@@ -441,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (!tablaHistorialCuerpo) return;
             tablaHistorialCuerpo.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Cargando historial...</td></tr>';
-            const respuesta = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/aprobadas`);
+            const respuesta = await fetch(`${apiBase}/api/donaciones/aprobadas`);
             const donaciones = await respuesta.json();
             tablaHistorialCuerpo.innerHTML = '';
             if (!donaciones || donaciones.length === 0) {

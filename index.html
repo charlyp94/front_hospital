@@ -161,8 +161,7 @@
     <section class="hero-section">
         <div class="hero-contenido">
             <h1>Tu ayuda transforma vidas</h1>
-            <p>Conocé el impacto de tu colaboración y sumate a nuestra misión para mejorar la atención de toda la
-                comunidad.</p>
+            <p>Conocé el impacto de tu colaboración y sumate a nuestra misión para mejorar la atención de toda la comunidad.</p>
 
             <div class="hero-botones">
                 <button id="btnAbrirModal" class="btn-donar">Realizar una Donación</button>
@@ -333,17 +332,17 @@
                         <div class="form-grupo">
                             <label for="nombreCompleto">Nombre Completo</label>
                             <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Ej: Juan Pérez"
-                                pattern="[A-Za-zÀ-ÿ\s]+" title="El nombre solo debe contener letras y espacios" required>
+                                pattern="[A-Za-zÀ-ÿ\s]+" title="El nombre solo debe contener letras y espacios" autocomplete="name" required>
                         </div>
                         <div class="form-row">
                             <div class="form-grupo">
                                 <label for="dni">DNI</label>
                                 <input type="text" id="dni" name="dni" placeholder="Ej: 38123456" 
-                                    inputmode="numeric" pattern="[0-9]{7,8}" title="Ingrese un DNI válido de 7 u 8 dígitos numéricos" required>
+                                    inputmode="numeric" pattern="[0-9]{7,8}" title="Ingrese un DNI válido de 7 u 8 dígitos numéricos" autocomplete="off" required>
                             </div>
                             <div class="form-grupo">
                                 <label for="fechaNacimiento">Fecha de Nacimiento</label>
-                                <input type="date" id="fechaNacimiento" name="fechaNacimiento">
+                                <input type="date" id="fechaNacimiento" name="fechaNacimiento" autocomplete="bday">
                             </div>
                         </div>
                         <div class="form-grupo">
@@ -364,7 +363,7 @@
                             <input type="text" id="nombreEmpresa" name="nombreEmpresa"
                                 placeholder="Ej: Distribuidora Norte S.A." pattern="[A-Za-zÀ-ÿ0-9\s\.\,\-]+">
                         </div>
-                        <!-- 🆕 NUEVO CAMPO CUIT -->
+                        <!-- CUIT -->
                         <div class="form-grupo">
                             <label for="cuit">CUIT de la Empresa</label>
                             <input type="text" id="cuit" name="cuit" placeholder="Ej: 30-71234567-9" 
@@ -375,12 +374,12 @@
                     <div class="form-row" style="margin-top: 10px;">
                         <div class="form-grupo" style="flex: 1;">
                             <label for="correo">Correo Electrónico</label>
-                            <input type="email" id="correo" name="correo" placeholder="nombre@correo.com" required>
+                            <input type="email" id="correo" name="correo" placeholder="nombre@correo.com" autocomplete="email" required>
                         </div>
                         <div class="form-grupo" style="flex: 1;">
                             <label for="telefono">Teléfono de Contacto</label>
                             <input type="text" id="telefono" name="telefono" placeholder="Ej: 3873123456" 
-                                inputmode="tel" pattern="[0-9]+" title="El teléfono debe contener únicamente números" required>
+                                inputmode="tel" pattern="[0-9]+" title="El teléfono debe contener únicamente números" autocomplete="tel" required>
                         </div>
                     </div>
                 </div>
@@ -409,7 +408,7 @@
                             style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;">
                     </div>
 
-                    <!-- 🆕 NUEVO CAMPO DESCRIPCIÓN -->
+                    <!-- DESCRIPCIÓN -->
                     <div class="form-grupo" style="margin-top: 15px;">
                         <label for="descripcion" style="font-weight: bold; display: block; margin-bottom: 8px;">Descripción / Detalle de los insumos:</label>
                         <textarea id="descripcion" name="descripcion" rows="3" placeholder="Ej: 5 cajas de gasas esterilizadas, 2 botellas de alcohol 500ml..."
@@ -440,7 +439,7 @@
             <p class="modal-subtitulo">Ingrese la contraseña para acceder al Panel de Gestión.</p>
             <div class="form-grupo">
                 <label for="passAdmin">Contraseña</label>
-                <input type="password" id="passAdmin" placeholder="••••••••">
+                <input type="password" id="passAdmin" placeholder="••••••••" autocomplete="current-password">
             </div>
             <button id="btnConfirmarAdmin" class="btn-donar" style="width: 100%; margin-top: 10px;">Ingresar</button>
         </div>
@@ -514,7 +513,7 @@
                 });
             }
 
-            // 🆕 Validación en tiempo real para el CUIT
+            // Validación en tiempo real para el CUIT
             const inputCuit = document.getElementById('cuit');
             if (inputCuit) {
                 inputCuit.addEventListener('input', (e) => {
