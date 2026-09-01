@@ -85,7 +85,7 @@
 
         /* Contenedor flotante de la tabla optimizado */
         .table-container {
-            max-width: 1000px;
+            max-width: 1100px;
             width: 96%;
             margin: 0 auto 20px auto;
             background: white;
@@ -104,7 +104,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            min-width: 700px;
         }
 
         th {
@@ -153,7 +153,7 @@
             padding: 25px 20px;
             border-radius: 12px;
             width: 85%;
-            max-width: 320px;
+            max-width: 350px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             text-align: left;
             transform: scale(0.8);
@@ -183,6 +183,7 @@
             margin: 10px 0;
             font-size: 15px;
             color: #444;
+            word-wrap: break-word;
         }
 
         .modal-detalle strong {
@@ -279,11 +280,12 @@
                         <th>Fecha</th>
                         <th>Categoría</th>
                         <th>Cantidad</th>
+                        <th>Detalle</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpo-tabla">
                     <tr>
-                        <td colspan="4" style="color: #666; font-style: italic;">Cargando registros públicos...</td>
+                        <td colspan="5" style="color: #666; font-style: italic;">Cargando registros públicos...</td>
                     </tr>
                 </tbody>
             </table>
@@ -318,22 +320,33 @@
                 cuerpo.innerHTML = '';
 
                 if (!datos || datos.length === 0) {
-                    cuerpo.innerHTML = '<tr><td colspan="4" style="color: #777; padding: 20px;">Aún no hay donaciones aprobadas para mostrar.</td></tr>';
+                    cuerpo.innerHTML = '<tr><td colspan="5" style="color: #777; padding: 20px;">Aún no hay donaciones aprobadas para mostrar.</td></tr>';
                     return;
                 }
 
                 cuerpo.innerHTML = datos.map(d => {
                     const fechaFormateada = d.fecha ? new Date(d.fecha).toLocaleDateString('es-AR') : 'Sin fecha';
-                    const nombreSeguro = encodeURIComponent(d.nombre || '');
-                    const categoriaSegura = encodeURIComponent(d.categoria || '');
-                    const cantidadSegura = d.cantidad || 0;
+                    const nombreTexto = d.nombre || d.nombreCompleto || 'Anónimo';
+                    const categoriaTexto = d.categoria || 'General';
+                    const cantidadValor = d.cantidad || 0;
+                    
+                    // Capturamos el detalle / descripción de forma segura
+                    const detalleTexto = d.descripcion || d.detalle || d.observaciones || 'Sin detalle';
+
+                    // Codificamos para pasar por parámetro al modal de forma segura
+                    const nombreSeguro = encodeURIComponent(nombreTexto);
+                    const fechaSegura = encodeURIComponent(fechaFormateada);
+                    const categoriaSegura = encodeURIComponent(categoriaTexto);
+                    const cantidadSegura = encodeURIComponent(cantidadValor);
+                    const detalleSeguro = encodeURIComponent(detalleTexto);
 
                     return `
-                        <tr class="fila-donacion" onclick="manejarClickFila('${nombreSeguro}', '${fechaFormateada}', '${categoriaSegura}', '${cantidadSegura}')">
-                            <td style="font-weight: bold; color: #222;">${d.nombre}</td>
+                        <tr class="fila-donacion" onclick="manejarClickFila('${nombreSeguro}', '${fechaSegura}', '${categoriaSegura}', '${cantidadSegura}', '${detalleSeguro}')">
+                            <td style="font-weight: bold; color: #222;">${nombreTexto}</td>
                             <td>${fechaFormateada}</td>
-                            <td>${d.categoria}</td>
-                            <td>${d.cantidad || 0}</td>
+                            <td>${categoriaTexto}</td>
+                            <td>${cantidadValor}</td>
+                            <td style="max-width: 180px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${detalleTexto}">${detalleTexto}</td>
                         </tr>
                     `;
                 }).join('');
@@ -341,18 +354,19 @@
             } catch (error) {
                 console.error("Error al cargar datos públicos:", error);
                 const cuerpo = document.getElementById('cuerpo-tabla');
-                cuerpo.innerHTML = '<tr><td colspan="4" style="color: red; font-weight: bold; padding: 20px;">Error al conectar con el servidor.</td></tr>';
+                cuerpo.innerHTML = '<tr><td colspan="5" style="color: red; font-weight: bold; padding: 20px;">Error al conectar con el servidor.</td></tr>';
             }
         }
 
         // Lógica para abrir el resumen flotante tanto en PC como en celulares
-        function manejarClickFila(nombre, fecha, categoria, cantidad) {
+        function manejarClickFila(nombre, fecha, categoria, cantidad, detalle) {
             const contenido = document.getElementById('modalContenidoTexto');
             contenido.innerHTML = `
                 <div class="modal-detalle"><strong>Nombre:</strong> ${decodeURIComponent(nombre)}</div>
-                <div class="modal-detalle"><strong>Fecha:</strong> ${fecha}</div>
+                <div class="modal-detalle"><strong>Fecha:</strong> ${decodeURIComponent(fecha)}</div>
                 <div class="modal-detalle"><strong>Categoría:</strong> ${decodeURIComponent(categoria)}</div>
-                <div class="modal-detalle"><strong>Cantidad:</strong> ${cantidad}</div>
+                <div class="modal-detalle"><strong>Cantidad:</strong> ${decodeURIComponent(cantidad)}</div>
+                <div class="modal-detalle"><strong>Detalle:</strong> ${decodeURIComponent(detalle)}</div>
             `;
 
             const modal = document.getElementById('modalResumen');
