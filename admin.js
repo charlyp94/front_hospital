@@ -9,14 +9,33 @@ async function cargarDonaciones() {
 
         cuerpo.innerHTML = datos.map(d => {
             const fechaFormateada = d.fecha ? new Date(d.fecha).toLocaleDateString('es-AR') : 'N/A';
+            
+            // Identificamos el documento (DNI o CUIT según lo que contenga la base de datos)
+            const documentoMostrar = d.dni || d.cuit || 'N/A';
+
+            // Preparamos los datos de contacto con validación por si vienen vacíos
+            const telefonoMostrar = d.telefono || 'No especificado';
+            const correoMostrar = d.correo || 'No especificado';
+
+            // Preparamos la descripción
+            const descripcionMostrar = d.descripcion || 'Sin descripción';
 
             return `
                 <tr>
-                    <td>${d.nombre}</td>
+                    <td><strong>${d.nombre || 'Anónimo'}</strong></td>
                     <td>${fechaFormateada}</td>
-                    <td>${d.dni || 'N/A'}</td>
+                    <td>${documentoMostrar}</td>
+                    <td>
+                        <div style="font-size: 0.85rem;">📞 ${telefonoMostrar}</div>
+                        <div style="font-size: 0.85rem; color: #555;">✉️ ${correoMostrar}</div>
+                    </td>
                     <td>${d.categoria}</td>
                     <td style="font-weight: bold; color: #4a2c35;">${d.cantidad || 0}</td>
+                    <td>
+                        <div style="max-width: 180px; font-size: 0.85rem; color: #444; word-wrap: break-word;" title="${descripcionMostrar}">
+                            ${descripcionMostrar}
+                        </div>
+                    </td>
                     <td>${d.estado}</td>
                     <td>
                         <button class="dropdown-toggle" onclick="manejarClickCambiar(${d.id}, '${d.estado}')">CAMBIAR ▾</button>
@@ -84,7 +103,7 @@ function abrirModal(id, estadoActual) {
                 isDisabled = true;
                 motivoBloqueo = estNorm === 'pendiente' ? 'No se permite retroceder a pendiente' : 'Ya está recibido';
             }
-        } else if (actualNorm === 'aprobado y destinado' || actualNorm === 'aprobado y destinado') {
+        } else if (actualNorm === 'aprobado y destinado') {
             // Si ya está aprobado, todo está bloqueado
             isDisabled = true;
             motivoBloqueo = 'Estado final alcanzado';
