@@ -55,6 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('nombreEmpresa').value = '';
                 document.getElementById('nombreEmpresa').removeAttribute('required');
             }
+            if (document.getElementById('cuit')) {
+                document.getElementById('cuit').value = '';
+                document.getElementById('cuit').removeAttribute('required');
+            }
             if (document.getElementById('nombreCompleto')) document.getElementById('nombreCompleto').setAttribute('required', 'true');
             if (document.getElementById('dni')) document.getElementById('dni').setAttribute('required', 'true');
             if (document.getElementById('genero')) document.getElementById('genero').setAttribute('required', 'true');
@@ -75,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('genero').removeAttribute('required');
             }
             if (document.getElementById('nombreEmpresa')) document.getElementById('nombreEmpresa').setAttribute('required', 'true');
+            if (document.getElementById('cuit')) document.getElementById('cuit').setAttribute('required', 'true');
         }
     }
 
@@ -85,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- RESTRICCIONES Y FILTROS DE ENTRADA (VALIDACIONES EN VIVO) ---
     const inputNombre = document.getElementById('nombreCompleto');
     const inputEmpresa = document.getElementById('nombreEmpresa');
+    const inputCuit = document.getElementById('cuit');
     const inputDni = document.getElementById('dni');
     const inputTel = document.getElementById('telefono');
 
@@ -96,8 +102,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (inputEmpresa) {
         inputEmpresa.addEventListener('input', (e) => {
-            // Modificado para bloquear estrictamente los números (se removió el 0-9)
             e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s\.\,\-]/g, '');
+        });
+    }
+
+    if (inputCuit) {
+        inputCuit.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9\-]/g, '').slice(0, 13);
         });
     }
 
@@ -120,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const correoInput = document.getElementById('correo')?.value || '';
             
-            // Validación previa de donación pendiente
+            // 🔒 Validación previa de donación pendiente por correo
             try {
                 const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : 'https://back-hospital-euk1.onrender.com';
                 const checkRes = await fetch(`${apiBase}/donaciones/verificar?correo=${encodeURIComponent(correoInput)}`);
@@ -147,13 +158,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
             } catch (err) {
-                console.error("Error al validar:", err);
+                console.error("Error al validar donación pendiente:", err);
             }
 
             const tipoDonante = radioPersona && radioPersona.checked ? 'persona' : 'empresa';
-            const correo = document.getElementById('correo')?.value || '';
+            const correo = correoInput;
             const telefono = document.getElementById('telefono')?.value || '';
             const cantidad = document.getElementById('cantidad')?.value || 0;
+            const descripcion = document.getElementById('descripcion')?.value || '';
             const generoSelect = document.getElementById('genero')?.value || null;
             const ocultarNombreWeb = checkAnonimo ? checkAnonimo.checked : false;
 
@@ -168,12 +180,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 tipoDonante: tipoDonante,
                 nombreCompleto: document.getElementById('nombreCompleto')?.value || '',
                 nombreEmpresa: document.getElementById('nombreEmpresa')?.value || '',
+                cuit: document.getElementById('cuit')?.value || null,
                 dni: document.getElementById('dni')?.value || null,
                 fechaNacimiento: document.getElementById('fechaNacimiento')?.value || null,
                 correo: correo,
                 telefono: telefono,
                 genero: generoSelect,
                 categoria: categoriaFinal,
+                descripcion: descripcion,
                 ocultarNombre: ocultarNombreWeb,
                 cantidad: cantidad
             };
@@ -252,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             documento.setTextColor(50, 50, 50);
 
                             let nombreMostrar = tipo === 'persona' ? datos.nombreCompleto : datos.nombreEmpresa;
-                            let documentoTexto = tipo === 'persona' ? `DNI: ${datos.dni || 'No especificado'}` : 'Tipo: Empresa / Institución';
+                            let documentoTexto = tipo === 'persona' ? `DNI: ${datos.dni || 'No especificado'}` : `CUIT: ${datos.cuit || 'No especificado'}`;
 
                             documento.text(`Fecha de Emisión: ${new Date().toLocaleDateString('es-AR')}`, 20, 55);
                             documento.text(`Donante: ${nombreMostrar}`, 20, 65);
@@ -263,14 +277,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             documento.saveGraphicsState();
                             documento.setGState(new documento.GState({ opacity: 0.3 }));
                             documento.setFillColor(244, 244, 244);
-                            documento.rect(20, 105, 170, 40, "F");
+                            documento.rect(20, 102, 170, 45, "F");
                             documento.restoreGraphicsState();
 
                             documento.setFont("helvetica", "bold");
-                            documento.text("Detalle de los Insumos / Categorías Comprometidas:", 25, 115);
+                            documento.text("Detalle de los Insumos / Categorías Comprometidas:", 25, 110);
                             documento.setFont("helvetica", "normal");
-                            documento.text(`- Categoría: ${datos.categoria}`, 25, 125);
-                            documento.text(`- Cantidad: ${datos.cantidad} unidades`, 25, 135);
+                            documento.text(`- Categoría: ${datos.categoria}`, 25, 118);
+                            documento.text(`- Cantidad: ${datos.cantidad} unidades`, 25, 126);
+                            
+                            let descripcionTexto = `- Descripción: ${datos.descripcion || 'Sin descripción detallada'}`;
+                            let lineasDesc = documento.splitTextToSize(descripcionTexto, 160);
+                            documento.text(lineasDesc, 25, 134);
 
                             documento.setFont("helvetica", "bold");
                             documento.setFontSize(14);

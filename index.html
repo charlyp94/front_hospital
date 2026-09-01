@@ -364,6 +364,12 @@
                             <input type="text" id="nombreEmpresa" name="nombreEmpresa"
                                 placeholder="Ej: Distribuidora Norte S.A." pattern="[A-Za-zÀ-ÿ0-9\s\.\,\-]+">
                         </div>
+                        <!-- 🆕 NUEVO CAMPO CUIT -->
+                        <div class="form-grupo">
+                            <label for="cuit">CUIT de la Empresa</label>
+                            <input type="text" id="cuit" name="cuit" placeholder="Ej: 30-71234567-9" 
+                                inputmode="numeric" maxlength="13">
+                        </div>
                     </div>
 
                     <div class="form-row" style="margin-top: 10px;">
@@ -401,6 +407,13 @@
                             unidades a donar:</label>
                         <input type="number" id="cantidad" name="cantidad" min="1" value="1" required
                             style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;">
+                    </div>
+
+                    <!-- 🆕 NUEVO CAMPO DESCRIPCIÓN -->
+                    <div class="form-grupo" style="margin-top: 15px;">
+                        <label for="descripcion" style="font-weight: bold; display: block; margin-bottom: 8px;">Descripción / Detalle de los insumos:</label>
+                        <textarea id="descripcion" name="descripcion" rows="3" placeholder="Ej: 5 cajas de gasas esterilizadas, 2 botellas de alcohol 500ml..."
+                            style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; resize: vertical;"></textarea>
                     </div>
                 </div>
 
@@ -498,6 +511,14 @@
             if (inputEmpresa) {
                 inputEmpresa.addEventListener('input', (e) => {
                     e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ0-9\s\.\,\-]/g, '');
+                });
+            }
+
+            // 🆕 Validación en tiempo real para el CUIT
+            const inputCuit = document.getElementById('cuit');
+            if (inputCuit) {
+                inputCuit.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9\-]/g, '').slice(0, 13);
                 });
             }
 
