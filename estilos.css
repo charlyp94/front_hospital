@@ -614,35 +614,3 @@ html {
         height: 90px;
     }
 }
-:root {
-    --color-primario: #4a2c35; /* Tono vino / morado oscuro principal */
-    --color-secundario: #6b3e4d;
-    --color-fondo: #f4f6f9;
-}
-
-body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--color-fondo);
-    color: #333;
-    position: relative;
-    min-height: 100vh;
-}
-
-/* EFECTO DE LOGO DE FONDO CON MARCA DE AGUA */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* Reemplazá 'logo-hospital.png' por el nombre o ruta real de tu logo */
-    background-image: url('logo-hospital.png'); 
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 400px; /* Tamaño del logo de fondo */
-    opacity: 0.04; /* Muy transparente para que no moleste a la lectura */
-    z-index: -1;
-    pointer-events: none;
-}
