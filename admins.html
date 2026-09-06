@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador - Hospital Luis A. Güemes</title>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
+        header { background-color: #2c3e50; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; color: #333; }
+        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+        .btn-primary { background-color: #2980b9; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .alerta-info { background-color: #e8f4fd; color: #1d6fa5; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Panel de Administrador (Gestión Operativa)</h1>
+        <div>
+            <span>Hola, Admin</span> | 
+            <a href="./login.html" style="color: white; text-decoration: underline;">Cerrar Sesión</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Creación de Usuarios</h2>
+        <div class="alerta-info">
+            Nota: Los usuarios creados desde este panel obtendrán el rol de operador estándar automáticamente. Para asignar roles avanzados, contacte a un Superadministrador.
+        </div>
+        
+        <div style="background: #fdfefe; padding: 15px; border: 1px solid #e1e4e8; border-radius: 6px; margin-bottom: 20px;">
+            <form id="formCrearUsuarioAdmin">
+                <div class="form-group">
+                    <label for="nombreUsuarioAdmin">Nombre de Usuario o Email:</label>
+                    <input type="text" id="nombreUsuarioAdmin" required>
+                </div>
+                <!-- Sin selector de roles: el rol se asigna por defecto en el backend -->
+                <button type="submit" class="btn btn-primary">Registrar Usuario</button>
+            </form>
+        </div>
+
+        <h3>Listado de Usuarios Registrados</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody id="tablaUsuariosAdmin">
+                <tr>
+                    <td>1</td>
+                    <td>admin_hospital@aguaray.com</td>
+                    <td>Administrador</td>
+                    <td>Activo</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

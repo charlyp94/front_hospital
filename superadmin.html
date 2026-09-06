@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Superadmin - Hospital Luis A. Güemes</title>
+    <link rel="stylesheet" href="./style.css"> <!-- Reutilizá o adaptá tus estilos -->
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
+        header { background-color: #1e8449; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; border-bottom: 2px solid #1e8449; padding-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; color: #333; }
+        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+        .btn-danger { background-color: #e74c3c; }
+        .btn-primary { background-color: #2980b9; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Panel de Superadministrador</h1>
+        <div>
+            <span>Hola, Superadmin</span> | 
+            <a href="./login.html" style="color: white; text-decoration: underline;">Cerrar Sesión</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Gestión de Usuarios y Roles (Acceso Total)</h2>
+        <div style="background: #eef9f2; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+            <h3>Crear Nuevo Usuario / Administrador</h3>
+            <form id="formCrearUsuarioSuper">
+                <div class="form-group">
+                    <label for="nombreUsuario">Nombre de Usuario o Email:</label>
+                    <input type="text" id="nombreUsuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="rolUsuario">Asignar Rol:</label>
+                    <select id="rolUsuario">
+                        <option value="admin">Administrador Común</option>
+                        <option value="superadmin">Superadministrador</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Crear Usuario con Rol</button>
+            </form>
+        </div>
+
+        <h3>Listado de Usuarios del Sistema</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Rol Actual</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaUsuariosSuper">
+                <!-- Datos de ejemplo cargados desde JS/Backend -->
+                <tr>
+                    <td>1</td>
+                    <td>admin_hospital@aguaray.com</td>
+                    <td>Administrador</td>
+                    <td><button class="btn btn-danger" onclick="eliminarUsuario(1)">Eliminar</button></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>super.carlos@aguaray.com</td>
+                    <td>Superadmin</td>
+                    <td><button class="btn btn-danger" disabled style="opacity: 0.5;">Eliminar</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
