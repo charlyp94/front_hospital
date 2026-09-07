@@ -287,7 +287,7 @@
                                 <th>Detalle / Elementos</th>
                                 <th>Fecha</th>
                                 <th>Estado</th>
-                                <th>Aprobado / Rechazado por</th>
+                                <th>Modificado por</th>
                                 <th>Acciones de Estado</th>
                             </tr>
                         </thead>
@@ -446,10 +446,10 @@
                     const estadoClase = estadoActual.toLowerCase().includes('aprobado') ? 'aprobado' : (estadoActual.toLowerCase().includes('rechazado') ? 'rechazado' : 'pendiente');
                     const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
 
-                    // Responsable de la gestión (según los campos devueltos por el backend)
+                    // Responsable de la modificación
                     const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por;
                     
-                    let responsableHtml = '<span style="color: #888; font-size: 0.85rem; font-style: italic;">Sin asignar</span>';
+                    let responsableHtml = '<span style="color: #888; font-size: 0.85rem; font-style: italic;">Sin modificar</span>';
                     if (responsable) {
                         responsableHtml = `<span style="font-weight: 600; color: #4a2c35;">👤 ${responsable}</span>`;
                     }
@@ -507,7 +507,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         estado: nuevoEstado,
-                        actualizado_por: nombreUsuarioActual // Enviamos el usuario que hace el cambio
+                        actualizado_por: nombreUsuarioActual // Enviamos el nombre del usuario que hace el cambio
                     })
                 });
                 if (!response.ok) throw new Error('No se pudo actualizar el estado');
@@ -519,7 +519,7 @@
             }
         }
 
-        // Modal de detalles con el responsable de la aprobación o rechazo
+        // Modal de detalles con el nombre exacto de la persona que modificó
         function verDetallesDonacion(id) {
             const item = donacionesCache.find(d => (d.id == id || d._id == id));
             if (!item) return;
@@ -533,7 +533,7 @@
                 motivoRechazoTexto = partes[1].replace(']', '').trim();
             }
 
-            const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por || 'No registrado';
+            const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por || 'Sin modificar';
 
             let modalDetalle = document.getElementById('modalDetallesDonacion');
             if (!modalDetalle) {
@@ -561,7 +561,7 @@
                         <div><strong>Descripción:</strong> ${descripcionLimpia}</div>
                         <div><strong>Fecha de registro:</strong> ${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</div>
                         <div><strong>Estado Actual:</strong> <span style="font-weight: bold; color: #007bff;">${item.estado || 'Pendiente'}</span></div>
-                        <div><strong>Gestionado / Aprobado por:</strong> <span style="color: #4a2c35; font-weight: 600;">${responsable}</span></div>
+                        <div><strong>Modificado por:</strong> <span style="color: #4a2c35; font-weight: 600;">${responsable}</span></div>
 
                         ${item.estado === 'Rechazado' ? `<div style="background: #ffe6e6; padding: 8px; border-radius: 4px; color: #d32f2f; margin-top: 5px;"><strong>Motivo de Rechazo:</strong> ${motivoRechazoTexto}</div>` : ''}
                     </div>
