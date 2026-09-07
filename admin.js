@@ -61,7 +61,15 @@ async function cargarDonaciones() {
 // ==========================================
 async function cambiarEstado(id, nuevoEstado, motivoRechazo = null) {
     try {
-        const bodyData = { nuevoEstado };
+        // Obtenemos el nombre del usuario logueado almacenado en el navegador.
+        // (Asegurate de que la clave del localStorage coincida con la que usaste al hacer el login).
+        const usuarioLogueado = localStorage.getItem('nombreUsuario') || localStorage.getItem('usuario') || 'Administrador';
+
+        const bodyData = { 
+            nuevoEstado: nuevoEstado,
+            actualizado_por: usuarioLogueado // <--- Enviamos el responsable real al servidor
+        };
+
         if (nuevoEstado === 'Rechazado' && motivoRechazo) {
             bodyData.motivoRechazo = motivoRechazo;
         }
