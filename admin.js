@@ -20,6 +20,10 @@ async function cargarDonaciones() {
             // Preparamos la descripción
             const descripcionMostrar = d.descripcion || 'Sin descripción';
 
+            // Estados finales o cerrados donde ya no se puede cambiar
+            const estadoActual = d.estado || 'Pendiente';
+            const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
+
             return `
                 <tr>
                     <td><strong>${d.nombre || 'Anónimo'}</strong></td>
@@ -36,9 +40,13 @@ async function cargarDonaciones() {
                             ${descripcionMostrar}
                         </div>
                     </td>
-                    <td>${d.estado}</td>
+                    <td><span style="font-weight: bold;">${estadoActual}</span></td>
                     <td>
-                        <button class="dropdown-toggle" onclick="manejarClickCambiar(${d.id}, '${d.estado}')">CAMBIAR ▾</button>
+                        ${
+                            esFinal 
+                            ? `<span style="font-size: 0.85rem; color: #666; font-style: italic;">🔒 Cerrado</span>`
+                            : `<button class="dropdown-toggle" onclick="manejarClickCambiar(${d.id}, '${estadoActual}')">CAMBIAR ▾</button>`
+                        }
                     </td>
                 </tr>
             `;
@@ -51,12 +59,17 @@ async function cargarDonaciones() {
 // ==========================================
 // 3. Función para enviar el cambio de estado al servidor
 // ==========================================
-async function cambiarEstado(id, nuevoEstado) {
+async function cambiarEstado(id, nuevoEstado, motivoRechazo = null) {
     try {
+        const bodyData = { nuevoEstado };
+        if (nuevoEstado === 'Rechazado' && motivoRechazo) {
+            bodyData.motivoRechazo = motivoRechazo;
+        }
+
         const res = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nuevoEstado })
+            body: JSON.stringify(bodyData)
         });
 
         const resultado = await res.json();
@@ -69,6 +82,7 @@ async function cambiarEstado(id, nuevoEstado) {
         }
     } catch (error) {
         console.error("Error al conectar con el servidor:", error);
+        alert('Error al conectar con el servidor.');
     }
 }
 
@@ -80,7 +94,8 @@ function manejarClickCambiar(id, estadoActual) {
 
 function abrirModal(id, estadoActual) {
     const modalOpciones = document.getElementById('modalOpciones');
-    const estados = ['Pendiente', 'Recibido', 'Aprobado y Destinado'];
+    // Definimos las opciones que contempla todo el flujo
+    const estados = ['Pendiente', 'Recibido', 'Aprobado y Destinado', 'Rechazado'];
 
     // Normalizamos el texto por seguridad
     const actualNorm = estadoActual.trim().toLowerCase();
@@ -90,30 +105,35 @@ function abrirModal(id, estadoActual) {
         let isDisabled = false;
         let motivoBloqueo = '';
 
-        // REGLAS DE BLOQUEO ESTRICTAS (Paso a paso y sin retroceder):
+        // REGLAS DE BLOQUEO ESTRICTAS Y FLUJO:
         if (actualNorm === 'pendiente') {
-            // Desde pendiente, SOLO se puede pasar a recibido. No se puede saltar a aprobado ni quedarse en pendiente por cambiar.
-            if (estNorm === 'pendiente' || estNorm === 'aprobado y destinado') {
+            // Desde pendiente, SOLO se puede pasar a recibido.
+            if (estNorm !== 'recibido') {
                 isDisabled = true;
-                motivoBloqueo = estNorm === 'aprobado y destinado' ? 'Debe marcarse como recibido primero' : 'Estado actual';
+                motivoBloqueo = estNorm === 'pendiente' ? 'Estado actual' : 'Debe marcarse como recibido primero';
             }
         } else if (actualNorm === 'recibido') {
-            // Desde recibido, SOLO se puede pasar a aprobado. No se puede volver a pendiente ni re-cliquear recibido.
+            // Desde recibido, SOLO se puede pasar a aprobado y destinado o rechazado.
             if (estNorm === 'pendiente' || estNorm === 'recibido') {
                 isDisabled = true;
                 motivoBloqueo = estNorm === 'pendiente' ? 'No se permite retroceder a pendiente' : 'Ya está recibido';
             }
-        } else if (actualNorm === 'aprobado y destinado') {
-            // Si ya está aprobado, todo está bloqueado
+        } else {
             isDisabled = true;
             motivoBloqueo = 'Estado final alcanzado';
         }
 
         const esSeleccionado = (actualNorm === estNorm);
 
+        // Si es la opción "Rechazado", interceptamos el clic para pedir el motivo obligatoriamente
+        let clickAccion = `cambiarEstado(${id}, '${est}')`;
+        if (est === 'Rechazado' && !isDisabled) {
+            clickAccion = `pedirMotivoYRechazar(${id})`;
+        }
+
         return `
             <button class="modal-btn ${esSeleccionado ? 'selected' : ''}" 
-                ${isDisabled ? 'disabled style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed; opacity: 0.7;"' : `onclick="cambiarEstado(${id}, '${est}')"`}
+                ${isDisabled ? 'disabled style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed; opacity: 0.7;"' : `onclick="${clickAccion}"`}
                 title="${motivoBloqueo}">
                 ${est} ${isDisabled ? ' 🔒' : ''}
             </button>
@@ -127,6 +147,16 @@ function abrirModal(id, estadoActual) {
     setTimeout(() => {
         modal.classList.add('active');
     }, 10);
+}
+
+// Función auxiliar para solicitar obligatoriamente el motivo al rechazar
+function pedirMotivoYRechazar(id) {
+    const motivo = prompt('Por favor, ingrese el motivo por el cual se rechaza esta donación:');
+    if (!motivo || motivo.trim() === '') {
+        alert('Es obligatorio especificar un motivo para rechazar la donación.');
+        return;
+    }
+    cambiarEstado(id, 'Rechazado', motivo.trim());
 }
 
 function cerrarModal() {
