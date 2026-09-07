@@ -20,22 +20,42 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Configurar el botón de Cerrar Sesión
+    // Configurar el botón de Cerrar Sesión para abrir el modal estilizado
     const btnCerrarSesion = document.getElementById('btnCerrarSesion');
     if (btnCerrarSesion) {
         btnCerrarSesion.addEventListener('click', () => {
-            const confirmar = confirm("¿Estás seguro de que deseas cerrar sesión?");
-            if (confirmar) {
-                sessionStorage.clear();
-                localStorage.clear();
-                window.location.href = 'index.html';
+            const modalLogout = document.getElementById('modalCerrarSesion');
+            if (modalLogout) {
+                modalLogout.style.display = 'flex';
+                setTimeout(() => modalLogout.classList.add('active'), 10);
             }
+        });
+    }
+
+    // Acción del botón de confirmar salida dentro del modal
+    const btnConfirmarLogout = document.getElementById('btnConfirmarLogout');
+    if (btnConfirmarLogout) {
+        btnConfirmarLogout.addEventListener('click', () => {
+            sessionStorage.clear();
+            localStorage.clear();
+            window.location.href = 'index.html';
         });
     }
 
     // Ejecutamos la carga inicial de donaciones
     cargarDonaciones();
 });
+
+// Función para cerrar el modal de logout sin salir
+function cerrarModalCerrarSesion() {
+    const modalLogout = document.getElementById('modalCerrarSesion');
+    if (modalLogout) {
+        modalLogout.classList.remove('active');
+        setTimeout(() => {
+            modalLogout.style.display = 'none';
+        }, 300);
+    }
+}
 
 // ==========================================
 // 2. Función para cargar y mostrar las donaciones
@@ -65,7 +85,6 @@ async function cargarDonaciones() {
             const estadoActual = d.estado || 'Pendiente';
             const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
 
-            // Nota: Usamos d.id o d._id dependiendo de cómo venga en tu backend de MongoDB/SQL
             const idDonacion = d.id || d._id;
 
             return `
@@ -105,7 +124,6 @@ async function cargarDonaciones() {
 // ==========================================
 async function cambiarEstado(id, nuevoEstado, motivoRechazo = null) {
     try {
-        // Obtenemos de forma segura el nombre del usuario responsable actual
         const sesionData = sessionStorage.getItem('usuarioLogueado') || localStorage.getItem('usuarioLogueado');
         let usuarioResponsable = 'Administrador';
 
@@ -120,7 +138,7 @@ async function cambiarEstado(id, nuevoEstado, motivoRechazo = null) {
 
         const bodyData = { 
             nuevoEstado: nuevoEstado,
-            actualizado_por: usuarioResponsable // <--- Enviamos el responsable real al servidor
+            actualizado_por: usuarioResponsable 
         };
 
         if (nuevoEstado === 'Rechazado' && motivoRechazo) {
@@ -137,7 +155,7 @@ async function cambiarEstado(id, nuevoEstado, motivoRechazo = null) {
 
         if (res.ok) {
             cerrarModal();
-            cargarDonaciones(); // Recargamos la tabla al terminar
+            cargarDonaciones(); 
         } else {
             alert(resultado.error || 'Error al actualizar el estado.');
         }

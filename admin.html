@@ -340,6 +340,26 @@
         </div>
     </div>
 
+    <!-- VENTANA FLOTANTE PARA CONFIRMAR CIERRE DE SESIÓN -->
+    <div id="modalCerrarSesion" class="modal-overlay">
+        <div class="modal-content" style="max-width: 340px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">👋</div>
+            <h3 style="color: #4a2c35; margin-bottom: 10px;">¿Cerrar Sesión?</h3>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Estás a punto de salir del panel de gestión. ¿Deseas continuar?</p>
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" onclick="cerrarModalCerrarSesion()" 
+                    style="flex: 1; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: background 0.2s;">
+                    Cancelar
+                </button>
+                <button type="button" id="btnConfirmarLogout" 
+                    style="flex: 1; padding: 10px; background: #cc0000; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold; transition: background 0.2s;">
+                    Sí, Salir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 1. Cargar primero el archivo de configuración global -->
     <script src="config.js"></script>
 
