@@ -67,6 +67,10 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-logout:hover {
+            background-color: #b71c1c;
         }
 
         /* Navegación por pestañas */
@@ -222,7 +226,7 @@
             font-size: 0.8rem;
         }
 
-        /* Modal estilizado idéntico al login */
+        /* Modal de Alerta y Confirmación Animado */
         #feedbackOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -245,11 +249,33 @@
         }
         .feedback-modal.success .icon-container { border-color: #81c784; color: #388e3c; }
         .feedback-modal.error .icon-container { border-color: #e57373; color: #d32f2f; }
+        .feedback-modal.confirm .icon-container { border-color: #ffb74d; color: #f57c00; }
+        
         .svg-icon { width: 40px; height: 40px; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
         .feedback-modal.success .svg-icon { stroke: #388e3c; }
         .feedback-modal.error .svg-icon { stroke: #d32f2f; }
+        .feedback-modal.confirm .svg-icon { stroke: #f57c00; }
+
         .feedback-modal h3 { margin: 0 0 0.5rem 0; font-size: 1.3rem; }
-        .feedback-modal p { margin: 0; color: #666; font-size: 0.9rem; }
+        .feedback-modal p { margin: 0 0 1.5rem 0; color: #666; font-size: 0.9rem; }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .modal-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 0.9rem;
+        }
+        .modal-btn-confirm { background-color: #d32f2f; color: white; }
+        .modal-btn-confirm:hover { background-color: #b71c1c; }
+        .modal-btn-cancel { background-color: #e0e0e0; color: #333; }
+        .modal-btn-cancel:hover { background-color: #bdbdbd; }
     </style>
 </head>
 <body>
@@ -352,12 +378,13 @@
         </section>
     </main>
 
-    <!-- Modal de Alerta Animado -->
+    <!-- Modal de Alerta y Confirmación Animado -->
     <div id="feedbackOverlay">
         <div class="feedback-modal" id="feedbackModalBox">
             <div class="icon-container" id="iconContainer"></div>
             <h3 id="feedbackTitle">Título</h3>
             <p id="feedbackText">Mensaje</p>
+            <div id="modalActions" style="display: none;"></div>
         </div>
     </div>
 
@@ -378,9 +405,16 @@
             }
         }
 
+        // Evento Botón Cerrar Sesión con Modal de Confirmación
         document.getElementById('btnLogout').addEventListener('click', () => {
-            sessionStorage.removeItem('usuarioLogueado');
-            window.location.href = 'login.html';
+            mostrarModalConfirmacion(
+                '¿Cerrar sesión?', 
+                '¿Estás seguro de que deseas salir del panel de administración?',
+                () => {
+                    sessionStorage.removeItem('usuarioLogueado');
+                    window.location.href = 'index.html';
+                }
+            );
         });
 
         // 2. Control de Pestañas
@@ -392,12 +426,14 @@
             event.currentTarget.classList.add('active');
         }
 
-        // 3. Sistema de Modales de Feedback
+        // 3. Sistema de Modales de Feedback y Confirmación
         function mostrarModalTemporal(tipo, titulo, mensaje) {
             const overlay = document.getElementById('feedbackOverlay');
             const box = document.getElementById('feedbackModalBox');
             const icon = document.getElementById('iconContainer');
+            const actions = document.getElementById('modalActions');
             
+            actions.style.display = 'none';
             box.className = `feedback-modal ${tipo}`;
             document.getElementById('feedbackTitle').textContent = titulo;
             document.getElementById('feedbackText').textContent = mensaje;
@@ -412,6 +448,38 @@
             setTimeout(() => overlay.classList.remove('active'), 1500);
         }
 
+        function mostrarModalConfirmacion(titulo, mensaje, onConfirmar) {
+            const overlay = document.getElementById('feedbackOverlay');
+            const box = document.getElementById('feedbackModalBox');
+            const icon = document.getElementById('iconContainer');
+            const actions = document.getElementById('modalActions');
+
+            box.className = `feedback-modal confirm`;
+            document.getElementById('feedbackTitle').textContent = titulo;
+            document.getElementById('feedbackText').textContent = mensaje;
+
+            // Icono de interrogación / advertencia
+            icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`;
+
+            actions.style.display = 'flex';
+            actions.className = 'modal-buttons';
+            actions.innerHTML = `
+                <button class="modal-btn modal-btn-confirm" id="btnSiModal">Sí, salir</button>
+                <button class="modal-btn modal-btn-cancel" id="btnNoModal">Cancelar</button>
+            `;
+
+            overlay.classList.add('active');
+
+            document.getElementById('btnSiModal').onclick = () => {
+                overlay.classList.remove('active');
+                onConfirmar();
+            };
+
+            document.getElementById('btnNoModal').onclick = () => {
+                overlay.classList.remove('active');
+            };
+        }
+
         // 4. API: Cargar Donaciones
         async function cargarDonaciones() {
             try {
@@ -419,7 +487,7 @@
                 if (!response.ok) throw new Error('Error al conectar con el servidor');
                 const donaciones = await response.json();
                 
-                donacionesCache = donaciones; // Guardamos en caché
+                donacionesCache = donaciones;
                 
                 const tbody = document.getElementById('tablaDonaciones');
                 tbody.innerHTML = '';
@@ -434,7 +502,6 @@
                     const estadoClase = estadoActual.toLowerCase().includes('aprobado') ? 'aprobado' : (estadoActual.toLowerCase().includes('rechazado') ? 'rechazado' : 'pendiente');
                     const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
 
-                    // Responsable de la modificación
                     const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por;
                     
                     let responsableHtml = '<span style="color: #888; font-size: 0.85rem; font-style: italic;">Sin modificar</span>';
