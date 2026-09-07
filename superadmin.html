@@ -373,6 +373,9 @@
     </div>
 
     <script>
+        // Caché global para almacenar las donaciones y consultarlas en el modal de detalles
+        let donacionesCache = [];
+
         // 1. Control de Sesión
         const usuarioSesion = sessionStorage.getItem('usuarioLogueado');
         if (!usuarioSesion) {
@@ -427,6 +430,8 @@
                 if (!response.ok) throw new Error('Error al conectar con el servidor');
                 const donaciones = await response.json();
                 
+                donacionesCache = donaciones; // Guardamos en caché para los detalles
+                
                 const tbody = document.getElementById('tablaDonaciones');
                 tbody.innerHTML = '';
 
@@ -436,22 +441,42 @@
                 }
 
                 donaciones.forEach(item => {
-                    const estadoClase = item.estado ? item.estado.toLowerCase() : 'pendiente';
+                    const estadoActual = item.estado || 'Pendiente';
+                    const estadoClase = estadoActual.toLowerCase().includes('aprobado') ? 'aprobado' : (estadoActual.toLowerCase().includes('rechazado') ? 'rechazado' : 'pendiente');
+                    const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
+
+                    let selectHtml = '';
+                    if (esFinal) {
+                        selectHtml = `<span style="font-size: 0.85rem; color: #666; font-style: italic;">🔒 Cerrado (${estadoActual})</span>`;
+                    } else if (estadoActual === 'Pendiente') {
+                        selectHtml = `
+                            <select onchange="cambiarEstadoDonacion('${item.id || item._id}', this.value)" style="padding: 4px; border-radius: 4px;">
+                                <option value="" disabled selected>Pendiente (Marcar recibido...)</option>
+                                <option value="Recibido">Marcar como Recibido</option>
+                            </select>
+                        `;
+                    } else if (estadoActual === 'Recibido') {
+                        selectHtml = `
+                            <select onchange="cambiarEstadoDonacion('${item.id || item._id}', this.value)" style="padding: 4px; border-radius: 4px;">
+                                <option value="" disabled selected>En Hospital (Elegir destino...)</option>
+                                <option value="Aprobado y Destinado">Aprobado y Destinado</option>
+                                <option value="Rechazado">Rechazado</option>
+                            </select>
+                        `;
+                    }
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>#${item.id || item._id}</td>
-                        <td><strong>${item.nombre || item.donante || 'Anónimo'}</strong><br><small>${item.correo || ''}</small></td>
-                        <td>${item.descripcion || item.elementos || 'Sin detalle de elementos'}</td>
-                        <td>${item.fecha ? new Date(item.fecha).toLocaleDateString() : 'N/D'}</td>
-                        <td><span class="badge ${estadoClase}">${item.estado || 'Pendiente'}</span></td>
                         <td>
-                            <select onchange="cambiarEstadoDonacion('${item.id || item._id}', this.value)" style="padding: 4px; border-radius: 4px;">
-                                <option value="" disabled selected>Cambiar estado...</option>
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="Aprobado">Aprobado</option>
-                                <option value="Rechazado">Rechazado</option>
-                            </select>
+                            <a href="#" onclick="verDetallesDonacion(${item.id || item._id}); return false;" style="color: #007bff; text-decoration: none; font-weight: bold;">
+                                ${item.nombre || item.donante || 'Anónimo'}
+                            </a><br><small>${item.correo || ''}</small>
                         </td>
+                        <td>${item.descripcion || item.elementos || 'Sin detalle de elementos'}</td>
+                        <td>${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</td>
+                        <td><span class="badge ${estadoClase}">${estadoActual}</span></td>
+                        <td>${selectHtml}</td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -475,6 +500,60 @@
             } catch (error) {
                 mostrarModalTemporal('error', 'Error', 'No se pudo actualizar el estado de la donación.');
             }
+        }
+
+        // Función para abrir el modal de detalles al hacer clic en el nombre en el Superadmin
+        function verDetallesDonacion(id) {
+            const item = donacionesCache.find(d => (d.id == id || d._id == id));
+            if (!item) return;
+
+            let descripcionLimpia = item.descripcion || 'Sin descripción';
+            let motivoRechazoTexto = 'Ninguno';
+
+            if (descripcionLimpia.includes('[RECHAZADO:')) {
+                const partes = descripcionLimpia.split('| [RECHAZADO:');
+                descripcionLimpia = partes[0].trim();
+                motivoRechazoTexto = partes[1].replace(']', '').trim();
+            }
+
+            let modalDetalle = document.getElementById('modalDetallesDonacion');
+            if (!modalDetalle) {
+                modalDetalle = document.createElement('div');
+                modalDetalle.id = 'modalDetallesDonacion';
+                modalDetalle.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;
+                `;
+                document.body.appendChild(modalDetalle);
+            }
+
+            modalDetalle.innerHTML = `
+                <div style="background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: inherit; color: #333;">
+                    <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Detalles de la Donación #${item.id || item._id}</h3>
+                    
+                    <div style="margin: 15px 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; color: #444;">
+                        <div><strong>Donante:</strong> ${item.nombre || 'Anónimo'}</div>
+                        <div><strong>Tipo:</strong> ${item.tipo_donante || 'N/D'}</div>
+                        <div><strong>Documento (DNI/CUIT):</strong> ${item.dni || item.cuit || 'N/D'}</div>
+                        <div><strong>Correo:</strong> ${item.correo || 'N/D'}</div>
+                        <div><strong>Teléfono:</strong> ${item.telefono || 'N/D'}</div>
+                        <div><strong>Categoría:</strong> ${item.categoria || 'N/D'}</div>
+                        <div><strong>Cantidad:</strong> ${item.cantidad || 0}</div>
+                        <div><strong>Descripción:</strong> ${descripcionLimpia}</div>
+                        <div><strong>Fecha de registro:</strong> ${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</div>
+                        <div><strong>Estado Actual:</strong> <span style="font-weight: bold; color: #007bff;">${item.estado || 'Pendiente'}</span></div>
+                        
+                        ${item.estado === 'Rechazado' ? `<div style="background: #ffe6e6; padding: 8px; border-radius: 4px; color: #d32f2f; margin-top: 5px;"><strong>Motivo de Rechazo:</strong> ${motivoRechazoTexto}</div>` : ''}
+                    </div>
+
+                    <div style="text-align: right; margin-top: 20px;">
+                        <button onclick="document.getElementById('modalDetallesDonacion').remove()" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            `;
+            modalDetalle.style.display = 'flex';
         }
 
         // 5. API: Gestión de Usuarios
