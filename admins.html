@@ -3,71 +3,626 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrador - Hospital Luis A. Güemes</title>
-    <link rel="stylesheet" href="./style.css">
+    <title>Panel Administrador - SISGESD</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
-        header { background-color: #2c3e50; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .container { max-width: 1200px; margin: 30px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; color: #333; }
-        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; }
-        .btn-primary { background-color: #2980b9; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        .alerta-info { background-color: #e8f4fd; color: #1d6fa5; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 14px; }
+        :root {
+            --primary-color: #4a2c35;
+            --primary-hover: #351f26;
+            --bg-light: rgba(255, 255, 255, 0.95);
+            --text-dark: #333333;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Logo de fondo con transparencia */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('logo.jpg'); 
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 600px;
+            opacity: 0.12;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        header {
+            background: rgba(35, 20, 25, 0.9);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-logout {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Navegación por pestañas */
+        .nav-tabs {
+            display: flex;
+            background: rgba(35, 20, 25, 0.6);
+            padding: 0 2rem;
+            gap: 1rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: white;
+            border-bottom-color: #ffffff;
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* Contenedores de secciones */
+        main {
+            flex: 1;
+            max-width: 1300px;
+            width: 95%;
+            margin: 2rem auto;
+            box-sizing: border-box;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card-container {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 1rem;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.4rem;
+        }
+
+        /* Tablas */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f4ecee;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        tr:hover {
+            background-color: rgba(74, 44, 53, 0.03);
+        }
+
+        /* Insignias de estado / roles */
+        .badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .badge.pendiente { background-color: #fff3cd; color: #856404; }
+        .badge.aprobado { background-color: #d4edda; color: #155724; }
+        .badge.rechazado { background-color: #f8d7da; color: #721c24; }
+        
+        .badge.superadmin { background-color: #e1bee7; color: #4a148c; }
+        .badge.admin { background-color: #bbdefb; color: #0d47a1; }
+        .badge.usuario { background-color: #e0e0e0; color: #424242; }
+
+        /* Formularios y botones de acción rápida */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #444;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.65rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: var(--primary-hover); }
+
+        .btn-sm {
+            padding: 0.35rem 0.7rem;
+            font-size: 0.8rem;
+        }
+
+        /* Modal estilizado idéntico al login */
+        #feedbackOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 999; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #feedbackOverlay.active { opacity: 1; visibility: visible; }
+        .feedback-modal {
+            background: #ffffff; width: 90%; max-width: 420px;
+            padding: 2.5rem 2rem; border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center;
+            transform: scale(0.85); transition: transform 0.3s ease; color: #333;
+        }
+        #feedbackOverlay.active .feedback-modal { transform: scale(1); }
+        .icon-container {
+            width: 75px; height: 75px; border-radius: 50%; margin: 0 auto 1.2rem auto;
+            display: flex; justify-content: center; align-items: center; border: 3px solid; background: #fff;
+        }
+        .feedback-modal.success .icon-container { border-color: #81c784; color: #388e3c; }
+        .feedback-modal.error .icon-container { border-color: #e57373; color: #d32f2f; }
+        .svg-icon { width: 40px; height: 40px; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .feedback-modal.success .svg-icon { stroke: #388e3c; }
+        .feedback-modal.error .svg-icon { stroke: #d32f2f; }
+        .feedback-modal h3 { margin: 0 0 0.5rem 0; font-size: 1.3rem; }
+        .feedback-modal p { margin: 0; color: #666; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Panel de Administrador (Gestión Operativa)</h1>
-        <div>
-            <span>Hola, Admin</span> | 
-            <a href="./login.html" style="color: white; text-decoration: underline;">Cerrar Sesión</a>
+        <h1>SISGESD - Panel de Administración</h1>
+        <div class="user-info">
+            <span id="saludoUsuario">Cargando...</span>
+            <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
         </div>
     </header>
 
-    <div class="container">
-        <h2>Creación de Usuarios</h2>
-        <div class="alerta-info">
-            Nota: Los usuarios creados desde este panel obtendrán el rol de operador estándar automáticamente. Para asignar roles avanzados, contacte a un Superadministrador.
-        </div>
-        
-        <div style="background: #fdfefe; padding: 15px; border: 1px solid #e1e4e8; border-radius: 6px; margin-bottom: 20px;">
-            <form id="formCrearUsuarioAdmin">
-                <div class="form-group">
-                    <label for="nombreUsuarioAdmin">Nombre de Usuario o Email:</label>
-                    <input type="text" id="nombreUsuarioAdmin" required>
-                </div>
-                <!-- Sin selector de roles: el rol se asigna por defecto en el backend -->
-                <button type="submit" class="btn btn-primary">Registrar Usuario</button>
-            </form>
-        </div>
-
-        <h3>Listado de Usuarios Registrados</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody id="tablaUsuariosAdmin">
-                <tr>
-                    <td>1</td>
-                    <td>admin_hospital@aguaray.com</td>
-                    <td>Administrador</td>
-                    <td>Activo</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('donaciones', event)">📦 Gestión de Donaciones</button>
+        <button class="tab-btn" onclick="switchTab('usuarios', event)">👥 Gestión de Usuarios</button>
     </div>
 
+    <main>
+        <!-- SECCIÓN 1: DONACIONES -->
+        <section id="tab-donaciones" class="tab-content active">
+            <div class="card-container">
+                <div class="card-header">
+                    <h2>Historial Completo de Donaciones</h2>
+                    <button class="btn btn-sm" onclick="cargarDonaciones()">🔄 Actualizar Lista</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Donante</th>
+                                <th>Detalle / Elementos</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Modificado por</th>
+                                <th>Acciones de Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaDonaciones">
+                            <tr><td colspan="7" style="text-align: center;">Cargando donaciones...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: USUARIOS -->
+        <section id="tab-usuarios" class="tab-content">
+            <!-- Formulario Crear Usuario -->
+            <div class="card-container">
+                <div class="card-header">
+                    <h2>Crear Nuevo Usuario Común</h2>
+                </div>
+                <form id="formCrearUsuario">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nuevoNombre">Nombre Completo</label>
+                            <input type="text" id="nuevoNombre" required placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="form-group">
+                            <label for="nuevoUsername">Nombre de Usuario</label>
+                            <input type="text" id="nuevoUsername" required placeholder="Ej. jperez">
+                        </div>
+                        <div class="form-group">
+                            <label for="nuevoDni">DNI</label>
+                            <input type="text" id="nuevoDni" required placeholder="Ej. 35123456">
+                        </div>
+                        <div class="form-group">
+                            <label for="nuevoPassword">Contraseña</label>
+                            <input type="password" id="nuevoPassword" required placeholder="••••••••">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Registrar Usuario Común</button>
+                </form>
+            </div>
+
+            <!-- Listado de Usuarios -->
+            <div class="card-container">
+                <div class="card-header">
+                    <h2>Usuarios Registrados en el Sistema</h2>
+                    <button class="btn btn-sm" onclick="cargarUsuarios()">🔄 Actualizar Usuarios</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Usuario</th>
+                                <th>DNI</th>
+                                <th>Rol Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuarios">
+                            <tr><td colspan="5" style="text-align: center;">Cargando usuarios...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de Alerta Animado -->
+    <div id="feedbackOverlay">
+        <div class="feedback-modal" id="feedbackModalBox">
+            <div class="icon-container" id="iconContainer"></div>
+            <h3 id="feedbackTitle">Título</h3>
+            <p id="feedbackText">Mensaje</p>
+        </div>
+    </div>
+
+    <script>
+        // Caché global para almacenar las donaciones y consultarlas en el modal de detalles
+        let donacionesCache = [];
+
+        // 1. Control de Sesión
+        const usuarioSesion = sessionStorage.getItem('usuarioLogueado');
+        if (!usuarioSesion) {
+            window.location.href = 'login.html';
+        } else {
+            const datosUser = JSON.parse(usuarioSesion);
+            document.getElementById('saludoUsuario').textContent = `${datosUser.nombre} (${datosUser.rol})`;
+            
+            if (datosUser.rol !== 'superadmin' && datosUser.rol !== 'admin') {
+                window.location.href = 'index.html';
+            }
+        }
+
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            sessionStorage.removeItem('usuarioLogueado');
+            window.location.href = 'login.html';
+        });
+
+        // 2. Control de Pestañas
+        function switchTab(tabId, event) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // 3. Sistema de Modales de Feedback
+        function mostrarModalTemporal(tipo, titulo, mensaje) {
+            const overlay = document.getElementById('feedbackOverlay');
+            const box = document.getElementById('feedbackModalBox');
+            const icon = document.getElementById('iconContainer');
+            
+            box.className = `feedback-modal ${tipo}`;
+            document.getElementById('feedbackTitle').textContent = titulo;
+            document.getElementById('feedbackText').textContent = mensaje;
+
+            if (tipo === 'success') {
+                icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>`;
+            } else {
+                icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+            }
+
+            overlay.classList.add('active');
+            setTimeout(() => overlay.classList.remove('active'), 1500);
+        }
+
+        // 4. API: Cargar Donaciones
+        async function cargarDonaciones() {
+            try {
+                const response = await fetch('https://back-hospital-euk1.onrender.com/api/donaciones');
+                if (!response.ok) throw new Error('Error al conectar con el servidor');
+                const donaciones = await response.json();
+                
+                donacionesCache = donaciones; // Guardamos en caché
+                
+                const tbody = document.getElementById('tablaDonaciones');
+                tbody.innerHTML = '';
+
+                if (donaciones.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay donaciones registradas.</td></tr>';
+                    return;
+                }
+
+                donaciones.forEach(item => {
+                    const estadoActual = item.estado || 'Pendiente';
+                    const estadoClase = estadoActual.toLowerCase().includes('aprobado') ? 'aprobado' : (estadoActual.toLowerCase().includes('rechazado') ? 'rechazado' : 'pendiente');
+                    const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
+
+                    // Responsable de la modificación
+                    const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por;
+                    
+                    let responsableHtml = '<span style="color: #888; font-size: 0.85rem; font-style: italic;">Sin modificar</span>';
+                    if (responsable) {
+                        responsableHtml = `<span style="font-weight: 600; color: #4a2c35;">👤 ${responsable}</span>`;
+                    }
+
+                    let selectHtml = '';
+                    if (esFinal) {
+                        selectHtml = `<span style="font-size: 0.85rem; color: #666; font-style: italic;">🔒 Cerrado (${estadoActual})</span>`;
+                    } else if (estadoActual === 'Pendiente') {
+                        selectHtml = `
+                            <select onchange="cambiarEstadoDonacion('${item.id || item._id}', this.value)" style="padding: 4px; border-radius: 4px;">
+                                <option value="" disabled selected>Pendiente (Marcar recibido...)</option>
+                                <option value="Recibido">Marcar como Recibido</option>
+                            </select>
+                        `;
+                    } else if (estadoActual === 'Recibido') {
+                        selectHtml = `
+                            <select onchange="cambiarEstadoDonacion('${item.id || item._id}', this.value)" style="padding: 4px; border-radius: 4px;">
+                                <option value="" disabled selected>En Hospital (Elegir destino...)</option>
+                                <option value="Aprobado y Destinado">Aprobado y Destinado</option>
+                                <option value="Rechazado">Rechazado</option>
+                            </select>
+                        `;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>#${item.id || item._id}</td>
+                        <td>
+                            <a href="#" onclick="verDetallesDonacion(${item.id || item._id}); return false;" style="color: #007bff; text-decoration: none; font-weight: bold;">
+                                ${item.nombre || item.donante || 'Anónimo'}
+                            </a><br><small>${item.correo || ''}</small>
+                        </td>
+                        <td>${item.descripcion || item.elementos || 'Sin detalle de elementos'}</td>
+                        <td>${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</td>
+                        <td><span class="badge ${estadoClase}">${estadoActual}</span></td>
+                        <td>${responsableHtml}</td>
+                        <td>${selectHtml}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error(error);
+                document.getElementById('tablaDonaciones').innerHTML = '<tr><td colspan="7" style="text-align: center; color: #d32f2f;">No se pudieron cargar las donaciones.</td></tr>';
+            }
+        }
+
+        async function cambiarEstadoDonacion(id, nuevoEstado) {
+            try {
+                const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
+                const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
+
+                const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        estado: nuevoEstado,
+                        actualizado_por: nombreUsuarioActual
+                    })
+                });
+                if (!response.ok) throw new Error('No se pudo actualizar el estado');
+                
+                mostrarModalTemporal('success', '¡Estado Actualizado!', `La donación ahora figura como: ${nuevoEstado}`);
+                cargarDonaciones();
+            } catch (error) {
+                mostrarModalTemporal('error', 'Error', 'No se pudo actualizar el estado de la donación.');
+            }
+        }
+
+        function verDetallesDonacion(id) {
+            const item = donacionesCache.find(d => (d.id == id || d._id == id));
+            if (!item) return;
+
+            let descripcionLimpia = item.descripcion || 'Sin descripción';
+            let motivoRechazoTexto = 'Ninguno';
+
+            if (descripcionLimpia.includes('[RECHAZADO:')) {
+                const partes = descripcionLimpia.split('| [RECHAZADO:');
+                descripcionLimpia = partes[0].trim();
+                motivoRechazoTexto = partes[1].replace(']', '').trim();
+            }
+
+            const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por || 'Sin modificar';
+
+            let modalDetalle = document.getElementById('modalDetallesDonacion');
+            if (!modalDetalle) {
+                modalDetalle = document.createElement('div');
+                modalDetalle.id = 'modalDetallesDonacion';
+                modalDetalle.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;
+                `;
+                document.body.appendChild(modalDetalle);
+            }
+
+            modalDetalle.innerHTML = `
+                <div style="background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: inherit; color: #333; max-height: 90vh; overflow-y: auto;">
+                    <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Detalles de la Donación #${item.id || item._id}</h3>
+                    
+                    <div style="margin: 15px 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; color: #444;">
+                        <div><strong>Donante:</strong> ${item.nombre || 'Anónimo'}</div>
+                        <div><strong>Tipo:</strong> ${item.tipo_donante || 'N/D'}</div>
+                        <div><strong>Documento (DNI/CUIT):</strong> ${item.dni || item.cuit || 'N/D'}</div>
+                        <div><strong>Correo:</strong> ${item.correo || 'N/D'}</div>
+                        <div><strong>Teléfono:</strong> ${item.telefono || 'N/D'}</div>
+                        <div><strong>Categoría:</strong> ${item.categoria || 'N/D'}</div>
+                        <div><strong>Cantidad:</strong> ${item.cantidad || 0}</div>
+                        <div><strong>Descripción:</strong> ${descripcionLimpia}</div>
+                        <div><strong>Fecha de registro:</strong> ${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</div>
+                        <div><strong>Estado Actual:</strong> <span style="font-weight: bold; color: #007bff;">${item.estado || 'Pendiente'}</span></div>
+                        <div><strong>Modificado por:</strong> <span style="color: #4a2c35; font-weight: 600;">${responsable}</span></div>
+
+                        ${item.estado === 'Rechazado' ? `<div style="background: #ffe6e6; padding: 8px; border-radius: 4px; color: #d32f2f; margin-top: 5px;"><strong>Motivo de Rechazo:</strong> ${motivoRechazoTexto}</div>` : ''}
+                    </div>
+
+                    <div style="text-align: right; margin-top: 20px;">
+                        <button onclick="document.getElementById('modalDetallesDonacion').remove()" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            `;
+            modalDetalle.style.display = 'flex';
+        }
+
+        // 5. API: Gestión de Usuarios (Sin opción de eliminar)
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios');
+                if (!response.ok) throw new Error('Error al obtener usuarios');
+                const usuarios = await response.json();
+
+                const tbody = document.getElementById('tablaUsuarios');
+                tbody.innerHTML = '';
+
+                if (usuarios.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay usuarios registrados.</td></tr>';
+                    return;
+                }
+
+                usuarios.forEach(user => {
+                    const rolClase = user.rol ? user.rol.toLowerCase() : 'usuario';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>#${user.id || user._id}</td>
+                        <td>${user.nombre || 'Sin nombre'}</td>
+                        <td>${user.nombre_usuario || user.username}</td>
+                        <td>${user.dni || 'N/D'}</td>
+                        <td><span class="badge ${rolClase}">${user.rol}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error(error);
+                document.getElementById('tablaUsuarios').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #d32f2f;">Error al cargar usuarios.</td></tr>';
+            }
+        }
+
+        document.getElementById('formCrearUsuario').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nuevoNombre').value.trim();
+            const nombre_usuario = document.getElementById('nuevoUsername').value.trim();
+            const dni = document.getElementById('nuevoDni').value.trim();
+            const contrasena = document.getElementById('nuevoPassword').value.trim();
+            const rol = 'usuario'; // Se asigna automáticamente como usuario común
+
+            try {
+                const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, nombre_usuario, dni, contrasena, rol })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'No se pudo crear el usuario');
+
+                mostrarModalTemporal('success', '¡Usuario Creado!', `Se registró exitosamente a ${nombre} como usuario común`);
+                document.getElementById('formCrearUsuario').reset();
+                cargarUsuarios();
+            } catch (error) {
+                mostrarModalTemporal('error', 'Error', error.message || 'No se pudo crear el usuario.');
+            }
+        });
+
+        cargarDonaciones();
+        cargarUsuarios();
+    </script>
 </body>
 </html>
