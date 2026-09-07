@@ -142,32 +142,34 @@ function abrirModal(id, estadoActual) {
     }, 10);
 }
 
-// Muestra de manera elegante el cajoncito de texto dentro del mismo modal
+// Muestra de manera elegante y centrada el cajoncito de texto dentro del mismo modal
 function mostrarCajonRechazo(id) {
     const modalOpciones = document.getElementById('modalOpciones');
     
+    // Forzamos un diseño limpio y centrado, limpiando cualquier residuo anterior
     modalOpciones.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; padding: 5px;">
-            <label for="motivoTextarea" style="font-weight: bold; font-size: 0.9rem; color: #333;">
-                Motivo del rechazo <span style="color: red;">*</span>:
+        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; align-items: stretch; text-align: left;">
+            <label for="motivoTextarea" style="font-weight: bold; font-size: 0.95rem; color: #333;">
+                Motivo del rechazo <span style="color: #dc3545;">*</span>:
             </label>
             <textarea id="motivoTextarea" placeholder="Escriba aquí el motivo detallado..." 
-                style="width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: none;"></textarea>
+                style="width: 100%; height: 90px; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-family: inherit; font-size: 0.95rem; resize: none; box-sizing: border-box; outline: none;" 
+                onfocus="this.style.borderColor='#dc3545'" onblur="this.style.borderColor='#ced4da'"></textarea>
             
-            <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 5px;">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 5px;">
                 <button type="button" onclick="abrirModal(${id}, 'Recibido')" 
-                    style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                    style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
                     Cancelar
                 </button>
                 <button type="button" onclick="confirmarRechazoConMotivo(${id})" 
-                    style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold;">
+                    style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">
                     Confirmar Rechazo
                 </button>
             </div>
         </div>
     `;
     
-    // Autoenfocar el textarea para que escriba directamente
+    // Autoenfocar el textarea con un pequeño respiro para que la transición sea fluida
     setTimeout(() => {
         const txt = document.getElementById('motivoTextarea');
         if (txt) txt.focus();
