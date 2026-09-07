@@ -86,7 +86,7 @@ async function cambiarEstado(id, nuevoEstado, motivoRechazo = null) {
     }
 }
 
-// --- Apertura de la Ventana Flotante Animada (Universal para PC y Celular) ---
+// --- Apertura de la Ventana Flotante Animada ---
 
 function manejarClickCambiar(id, estadoActual) {
     abrirModal(id, estadoActual);
@@ -94,10 +94,7 @@ function manejarClickCambiar(id, estadoActual) {
 
 function abrirModal(id, estadoActual) {
     const modalOpciones = document.getElementById('modalOpciones');
-    // Definimos las opciones que contempla todo el flujo
     const estados = ['Pendiente', 'Recibido', 'Aprobado y Destinado', 'Rechazado'];
-
-    // Normalizamos el texto por seguridad
     const actualNorm = estadoActual.trim().toLowerCase();
 
     modalOpciones.innerHTML = estados.map(est => {
@@ -105,15 +102,12 @@ function abrirModal(id, estadoActual) {
         let isDisabled = false;
         let motivoBloqueo = '';
 
-        // REGLAS DE BLOQUEO ESTRICTAS Y FLUJO:
         if (actualNorm === 'pendiente') {
-            // Desde pendiente, SOLO se puede pasar a recibido.
             if (estNorm !== 'recibido') {
                 isDisabled = true;
                 motivoBloqueo = estNorm === 'pendiente' ? 'Estado actual' : 'Debe marcarse como recibido primero';
             }
         } else if (actualNorm === 'recibido') {
-            // Desde recibido, SOLO se puede pasar a aprobado y destinado o rechazado.
             if (estNorm === 'pendiente' || estNorm === 'recibido') {
                 isDisabled = true;
                 motivoBloqueo = estNorm === 'pendiente' ? 'No se permite retroceder a pendiente' : 'Ya está recibido';
@@ -125,10 +119,10 @@ function abrirModal(id, estadoActual) {
 
         const esSeleccionado = (actualNorm === estNorm);
 
-        // Si es la opción "Rechazado", interceptamos el clic para pedir el motivo obligatoriamente
+        // Si es "Rechazado", en lugar de un prompt feo, llamamos a una función que dibuja el cajoncito integrado
         let clickAccion = `cambiarEstado(${id}, '${est}')`;
         if (est === 'Rechazado' && !isDisabled) {
-            clickAccion = `pedirMotivoYRechazar(${id})`;
+            clickAccion = `mostrarCajonRechazo(${id})`;
         }
 
         return `
@@ -143,27 +137,61 @@ function abrirModal(id, estadoActual) {
     const modal = document.getElementById('modalEstado');
     modal.style.display = 'flex';
     
-    // Activa la clase para disparar la animación suave de entrada
     setTimeout(() => {
         modal.classList.add('active');
     }, 10);
 }
 
-// Función auxiliar para solicitar obligatoriamente el motivo al rechazar
-function pedirMotivoYRechazar(id) {
-    const motivo = prompt('Por favor, ingrese el motivo por el cual se rechaza esta donación:');
-    if (!motivo || motivo.trim() === '') {
+// Muestra de manera elegante el cajoncito de texto dentro del mismo modal
+function mostrarCajonRechazo(id) {
+    const modalOpciones = document.getElementById('modalOpciones');
+    
+    modalOpciones.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; padding: 5px;">
+            <label for="motivoTextarea" style="font-weight: bold; font-size: 0.9rem; color: #333;">
+                Motivo del rechazo <span style="color: red;">*</span>:
+            </label>
+            <textarea id="motivoTextarea" placeholder="Escriba aquí el motivo detallado..." 
+                style="width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: none;"></textarea>
+            
+            <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 5px;">
+                <button type="button" onclick="abrirModal(${id}, 'Recibido')" 
+                    style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                    Cancelar
+                </button>
+                <button type="button" onclick="confirmarRechazoConMotivo(${id})" 
+                    style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold;">
+                    Confirmar Rechazo
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Autoenfocar el textarea para que escriba directamente
+    setTimeout(() => {
+        const txt = document.getElementById('motivoTextarea');
+        if (txt) txt.focus();
+    }, 50);
+}
+
+// Procesa el texto escrito en el cajoncito
+function confirmarRechazoConMotivo(id) {
+    const textarea = document.getElementById('motivoTextarea');
+    const motivo = textarea ? textarea.value.trim() : '';
+
+    if (!motivo) {
         alert('Es obligatorio especificar un motivo para rechazar la donación.');
+        if (textarea) textarea.focus();
         return;
     }
-    cambiarEstado(id, 'Rechazado', motivo.trim());
+
+    cambiarEstado(id, 'Rechazado', motivo);
 }
 
 function cerrarModal() {
     const modal = document.getElementById('modalEstado');
-    modal.classList.remove('active'); // Inicia la animación de salida
+    modal.classList.remove('active');
     
-    // Espera a que termine la animación antes de ocultarlo por completo
     setTimeout(() => {
         modal.style.display = 'none';
     }, 300);
