@@ -18,7 +18,7 @@
             overflow: hidden;
         }
 
-        /* Logo de fondo con transparencia visible (opacidad ajustada) */
+        /* Logo de fondo con transparencia visible */
         body::before {
             content: "";
             position: fixed;
@@ -26,11 +26,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('logo.jpg'); 
+            background-image: url('logo-hospital.png'); 
             background-repeat: no-repeat;
             background-position: center;
             background-size: 500px;
-            opacity: 0.18; /* Se nota bien de fondo */
+            opacity: 0.18;
             z-index: -1;
             pointer-events: none;
         }
@@ -120,7 +120,7 @@
             text-decoration: underline;
         }
 
-        /* --- ESTILOS PARA LA ANIMACIÓN DE ACCESO (MODAL FEEDBACK) --- */
+        /* --- MODAL ESTILO GRANDE CON ÍCONO ANIMADO --- */
         #feedbackOverlay {
             position: fixed;
             top: 0;
@@ -142,34 +142,107 @@
             visibility: visible;
         }
 
-        .feedback-box {
-            background: white;
-            padding: 2rem 3rem;
+        .feedback-modal {
+            background: #ffffff;
+            width: 90%;
+            max-width: 450px;
+            padding: 2.5rem 2rem 2rem 2rem;
             border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            transform: scale(0.8);
+            position: relative;
+            transform: scale(0.85);
             transition: transform 0.3s ease;
         }
 
-        #feedbackOverlay.active .feedback-box {
+        #feedbackOverlay.active .feedback-modal {
             transform: scale(1);
         }
 
-        .feedback-box h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.4rem;
+        /* Círculo superior para el ícono animado */
+        .icon-container {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid;
+            background: #fff;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
         }
 
-        .feedback-box p {
-            margin: 0;
-            color: #555;
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Variantes de color e íconos */
+        .feedback-modal.error .icon-container {
+            border-color: #e57373;
+            color: #d32f2f;
+        }
+        .feedback-modal.success .icon-container {
+            border-color: #81c784;
+            color: #388e3c;
+        }
+
+        .feedback-modal h3 {
+            margin: 0 0 0.8rem 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .feedback-modal.error h3 { color: #d32f2f; }
+        .feedback-modal.success h3 { color: #388e3c; }
+
+        .feedback-modal p {
+            margin: 0 0 1.8rem 0;
+            color: #666;
             font-size: 0.95rem;
+            line-height: 1.4;
         }
 
-        /* Colores dinámicos según éxito o error */
-        .feedback-box.success h3 { color: #28a745; }
-        .feedback-box.error h3 { color: #dc3545; }
+        .modal-btn {
+            background-color: #4a2c35;
+            color: white;
+            border: none;
+            padding: 0.7rem 2.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-btn:hover {
+            background-color: #351f26;
+        }
+
+        /* Animación SVG interna para la Tilde y la X */
+        .svg-icon {
+            width: 45px;
+            height: 45px;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .feedback-modal.success .svg-icon { stroke: #388e3c; }
+        .feedback-modal.error .svg-icon { stroke: #d32f2f; }
+
+        /* Animación de trazo */
+        .path-anim {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: drawPath 0.5s ease forwards 0.2s;
+        }
+
+        @keyframes drawPath {
+            to { stroke-dashoffset: 0; }
+        }
     </style>
 </head>
 <body>
@@ -195,34 +268,58 @@
         <a href="index.html" class="back-link">← Volver al inicio</a>
     </div>
 
-    <!-- Capa de animación para el resultado del login -->
+    <!-- Modal grande con diseño idéntico al de las alertas -->
     <div id="feedbackOverlay">
-        <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-modal" id="feedbackModalBox">
+            <div class="icon-container" id="iconContainer">
+                <!-- Se inyecta dinámicamente el SVG de la Tilde o la X -->
+            </div>
             <h3 id="feedbackTitle">Título</h3>
             <p id="feedbackText">Mensaje</p>
+            <button class="modal-btn" id="modalActionBtn">OK</button>
         </div>
     </div>
 
     <script>
         const loginForm = document.getElementById('loginForm');
         const feedbackOverlay = document.getElementById('feedbackOverlay');
-        const feedbackBox = document.getElementById('feedbackBox');
+        const feedbackModalBox = document.getElementById('feedbackModalBox');
+        const iconContainer = document.getElementById('iconContainer');
         const feedbackTitle = document.getElementById('feedbackTitle');
         const feedbackText = document.getElementById('feedbackText');
+        const modalActionBtn = document.getElementById('modalActionBtn');
         const btnSubmit = document.getElementById('btnSubmit');
 
-        function mostrarFeedback(tipo, titulo, mensaje, callback) {
-            feedbackBox.className = `feedback-box ${tipo}`;
+        let callbackAccion = null;
+
+        function mostrarModal(tipo, titulo, mensaje, onOk) {
+            feedbackModalBox.className = `feedback-modal ${tipo}`;
             feedbackTitle.textContent = titulo;
             feedbackText.textContent = mensaje;
-            
-            feedbackOverlay.classList.add('active');
+            callbackAccion = onOk;
 
-            setTimeout(() => {
-                feedbackOverlay.classList.remove('active');
-                if (callback) callback();
-            }, 1800); // Se muestra la animación durante 1.8 segundos
+            // Inyectamos el SVG animado correspondiente (Tilde para success, X para error)
+            if (tipo === 'success') {
+                iconContainer.innerHTML = `
+                    <svg class="svg-icon" viewBox="0 0 24 24">
+                        <path class="path-anim" d="M20 6L9 17l-5-5"/>
+                    </svg>
+                `;
+            } else {
+                iconContainer.innerHTML = `
+                    <svg class="svg-icon" viewBox="0 0 24 24">
+                        <path class="path-anim" d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                `;
+            }
+
+            feedbackOverlay.classList.add('active');
         }
+
+        modalActionBtn.addEventListener('click', () => {
+            feedbackOverlay.classList.remove('active');
+            if (callbackAccion) callbackAccion();
+        });
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -245,14 +342,13 @@
                     throw new Error(data.error || 'Credenciales incorrectas');
                 }
 
-                // Guardamos sesión
                 sessionStorage.setItem('usuarioLogueado', JSON.stringify({
                     nombre: data.nombre,
                     rol: data.rol
                 }));
 
-                // Animación de éxito
-                mostrarFeedback('success', '¡Acceso Concedido!', `Bienvenido, ${data.nombre}`, () => {
+                // Modal de éxito con Tilde animada
+                mostrarModal('success', '¡Acceso Concedido!', `Bienvenido al sistema, ${data.nombre}. Redirigiendo...`, () => {
                     if (data.rol === 'superadmin' || data.rol === 'admin') {
                         window.location.href = 'admins.html'; 
                     } else {
@@ -261,8 +357,8 @@
                 });
 
             } catch (error) {
-                // Animación de error
-                mostrarFeedback('error', 'Acceso Denegado', error.message || 'Usuario o contraseña incorrectos', () => {
+                // Modal de error con X animada
+                mostrarModal('error', 'No se puede acceder', error.message || 'Usuario o contraseña incorrectos.', () => {
                     btnSubmit.disabled = false;
                     btnSubmit.textContent = 'Entrar al Sistema';
                 });
