@@ -316,6 +316,10 @@
                             <input type="text" id="nuevoUsername" required placeholder="Ej. jperez">
                         </div>
                         <div class="form-group">
+                            <label for="nuevoDni">DNI</label>
+                            <input type="text" id="nuevoDni" required placeholder="Ej. 35123456">
+                        </div>
+                        <div class="form-group">
                             <label for="nuevoPassword">Contraseña</label>
                             <input type="password" id="nuevoPassword" required placeholder="••••••••">
                         </div>
@@ -345,12 +349,13 @@
                                 <th>ID</th>
                                 <th>Nombre</th>
                                 <th>Usuario</th>
+                                <th>DNI</th>
                                 <th>Rol Asignado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaUsuarios">
-                            <tr><td colspan="5" style="text-align: center;">Cargando usuarios...</td></tr>
+                            <tr><td colspan="6" style="text-align: center;">Cargando usuarios...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -376,7 +381,6 @@
             const datosUser = JSON.parse(usuarioSesion);
             document.getElementById('saludoUsuario').textContent = `${datosUser.nombre} (${datosUser.rol})`;
             
-            // Si no es superadmin, restringir acceso a secciones avanzadas o redirigir
             if (datosUser.rol !== 'superadmin' && datosUser.rol !== 'admin') {
                 window.location.href = 'index.html';
             }
@@ -416,7 +420,7 @@
             setTimeout(() => overlay.classList.remove('active'), 1500);
         }
 
-        // 4. API: Cargar Donaciones (Endpoints de Render)
+        // 4. API: Cargar Donaciones
         async function cargarDonaciones() {
             try {
                 const response = await fetch('https://back-hospital-euk1.onrender.com/api/donaciones');
@@ -473,7 +477,7 @@
             }
         }
 
-        // 5. API: Gestión de Usuarios (Crear y Eliminar)
+        // 5. API: Gestión de Usuarios
         async function cargarUsuarios() {
             try {
                 const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios');
@@ -484,7 +488,7 @@
                 tbody.innerHTML = '';
 
                 if (usuarios.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay usuarios registrados.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay usuarios registrados.</td></tr>';
                     return;
                 }
 
@@ -495,6 +499,7 @@
                         <td>#${user.id || user._id}</td>
                         <td>${user.nombre || 'Sin nombre'}</td>
                         <td>${user.nombre_usuario || user.username}</td>
+                        <td>${user.dni || 'N/D'}</td>
                         <td><span class="badge ${rolClase}">${user.rol}</span></td>
                         <td>
                             <button class="btn btn-danger btn-sm" onclick="eliminarUsuario('${user.id || user._id}')">Eliminar</button>
@@ -504,7 +509,7 @@
                 });
             } catch (error) {
                 console.error(error);
-                document.getElementById('tablaUsuarios').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #d32f2f;">Error al cargar usuarios.</td></tr>';
+                document.getElementById('tablaUsuarios').innerHTML = '<tr><td colspan="6" style="text-align: center; color: #d32f2f;">Error al cargar usuarios.</td></tr>';
             }
         }
 
@@ -512,6 +517,7 @@
             e.preventDefault();
             const nombre = document.getElementById('nuevoNombre').value.trim();
             const nombre_usuario = document.getElementById('nuevoUsername').value.trim();
+            const dni = document.getElementById('nuevoDni').value.trim();
             const contrasena = document.getElementById('nuevoPassword').value.trim();
             const rol = document.getElementById('nuevoRol').value;
 
@@ -519,7 +525,7 @@
                 const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, nombre_usuario, contrasena, rol })
+                    body: JSON.stringify({ nombre, nombre_usuario, dni, contrasena, rol })
                 });
 
                 const data = await response.json();
@@ -549,7 +555,6 @@
             }
         }
 
-        // Inicializar datos al cargar la página
         cargarDonaciones();
         cargarUsuarios();
     </script>
