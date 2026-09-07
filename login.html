@@ -8,7 +8,6 @@
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* Fondo morado idéntico al de tu vista principal */
             background-color: #4a2c35;
             color: #ffffff;
             display: flex;
@@ -19,7 +18,7 @@
             overflow: hidden;
         }
 
-        /* Logo de fondo con transparencia (marca de agua) */
+        /* Logo de fondo con transparencia visible (opacidad ajustada) */
         body::before {
             content: "";
             position: fixed;
@@ -27,18 +26,16 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* Asegurate de poner el nombre exacto de la imagen de tu logo */
             background-image: url('logo.jpg'); 
             background-repeat: no-repeat;
             background-position: center;
             background-size: 500px;
-            opacity: 0.1; /* Transparencia sutil de fondo */
+            opacity: 0.18; /* Se nota bien de fondo */
             z-index: -1;
             pointer-events: none;
         }
 
         .login-card {
-            /* Tarjeta con fondo blanco/semitransparente o sólida para que resalte */
             background: #ffffff;
             padding: 2.5rem;
             border-radius: 12px;
@@ -47,6 +44,7 @@
             max-width: 420px;
             box-sizing: border-box;
             color: #333;
+            position: relative;
         }
 
         .login-card h2 {
@@ -109,20 +107,6 @@
             background-color: #351f26;
         }
 
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 0.75rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .hidden {
-            display: none;
-        }
-
         .back-link {
             display: block;
             text-align: center;
@@ -135,6 +119,57 @@
         .back-link:hover {
             text-decoration: underline;
         }
+
+        /* --- ESTILOS PARA LA ANIMACIÓN DE ACCESO (MODAL FEEDBACK) --- */
+        #feedbackOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #feedbackOverlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .feedback-box {
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        #feedbackOverlay.active .feedback-box {
+            transform: scale(1);
+        }
+
+        .feedback-box h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.4rem;
+        }
+
+        .feedback-box p {
+            margin: 0;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        /* Colores dinámicos según éxito o error */
+        .feedback-box.success h3 { color: #28a745; }
+        .feedback-box.error h3 { color: #dc3545; }
     </style>
 </head>
 <body>
@@ -143,33 +178,56 @@
         <h2>Acceso Panel de Gestión</h2>
         <p class="subtitle">Ingrese sus credenciales para continuar</p>
         
-        <div id="errorMessage" class="error-message hidden"></div>
-        
         <form id="loginForm">
             <div class="form-group">
                 <label for="nombre_usuario">Nombre de Usuario</label>
                 <input type="text" id="nombre_usuario" required autocomplete="username" placeholder="Ej. charly94">
             </div>
             
-            <div class="form-equal form-group">
+            <div class="form-group">
                 <label for="contrasena">Contraseña</label>
                 <input type="password" id="contrasena" required autocomplete="current-password" placeholder="••••••••">
             </div>
 
-            <button type="submit">Entrar al Sistema</button>
+            <button type="submit" id="btnSubmit">Entrar al Sistema</button>
         </form>
 
         <a href="index.html" class="back-link">← Volver al inicio</a>
     </div>
 
+    <!-- Capa de animación para el resultado del login -->
+    <div id="feedbackOverlay">
+        <div class="feedback-box" id="feedbackBox">
+            <h3 id="feedbackTitle">Título</h3>
+            <p id="feedbackText">Mensaje</p>
+        </div>
+    </div>
+
     <script>
         const loginForm = document.getElementById('loginForm');
-        const errorMessage = document.getElementById('errorMessage');
+        const feedbackOverlay = document.getElementById('feedbackOverlay');
+        const feedbackBox = document.getElementById('feedbackBox');
+        const feedbackTitle = document.getElementById('feedbackTitle');
+        const feedbackText = document.getElementById('feedbackText');
+        const btnSubmit = document.getElementById('btnSubmit');
+
+        function mostrarFeedback(tipo, titulo, mensaje, callback) {
+            feedbackBox.className = `feedback-box ${tipo}`;
+            feedbackTitle.textContent = titulo;
+            feedbackText.textContent = mensaje;
+            
+            feedbackOverlay.classList.add('active');
+
+            setTimeout(() => {
+                feedbackOverlay.classList.remove('active');
+                if (callback) callback();
+            }, 1800); // Se muestra la animación durante 1.8 segundos
+        }
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            errorMessage.classList.add('hidden');
-            errorMessage.textContent = '';
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Verificando...';
 
             const nombre_usuario = document.getElementById('nombre_usuario').value.trim();
             const contrasena = document.getElementById('contrasena').value.trim();
@@ -187,20 +245,27 @@
                     throw new Error(data.error || 'Credenciales incorrectas');
                 }
 
+                // Guardamos sesión
                 sessionStorage.setItem('usuarioLogueado', JSON.stringify({
                     nombre: data.nombre,
                     rol: data.rol
                 }));
 
-                if (data.rol === 'superadmin' || data.rol === 'admin') {
-                    window.location.href = 'admins.html'; 
-                } else {
-                    window.location.href = 'index.html';
-                }
+                // Animación de éxito
+                mostrarFeedback('success', '¡Acceso Concedido!', `Bienvenido, ${data.nombre}`, () => {
+                    if (data.rol === 'superadmin' || data.rol === 'admin') {
+                        window.location.href = 'admins.html'; 
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                });
 
             } catch (error) {
-                errorMessage.textContent = error.message;
-                errorMessage.classList.remove('hidden');
+                // Animación de error
+                mostrarFeedback('error', 'Acceso Denegado', error.message || 'Usuario o contraseña incorrectos', () => {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = 'Entrar al Sistema';
+                });
             }
         });
     </script>
