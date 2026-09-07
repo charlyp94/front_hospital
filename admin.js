@@ -1,4 +1,43 @@
 // ==========================================
+// 1. Control de Sesión y Carga de Usuario
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    // Intentamos recuperar la sesión desde sessionStorage o localStorage
+    const sesionData = sessionStorage.getItem('usuarioLogueado') || localStorage.getItem('usuarioLogueado');
+    
+    if (sesionData) {
+        try {
+            const usuarioLogueado = JSON.parse(sesionData);
+            const nombreMostrable = usuarioLogueado.nombre || usuarioLogueado.nombre_usuario || "Administrador";
+            
+            // Pintamos el nombre en el span de la barra superior si existe
+            const spanNombre = document.getElementById('nombreUsuario');
+            if (spanNombre) {
+                spanNombre.textContent = nombreMostrable;
+            }
+        } catch (e) {
+            console.error("Error al parsear los datos de sesión", e);
+        }
+    }
+
+    // Configurar el botón de Cerrar Sesión
+    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', () => {
+            const confirmar = confirm("¿Estás seguro de que deseas cerrar sesión?");
+            if (confirmar) {
+                sessionStorage.clear();
+                localStorage.clear();
+                window.location.href = 'index.html';
+            }
+        });
+    }
+
+    // Ejecutamos la carga inicial de donaciones
+    cargarDonaciones();
+});
+
+// ==========================================
 // 2. Función para cargar y mostrar las donaciones
 // ==========================================
 async function cargarDonaciones() {
@@ -6,6 +45,8 @@ async function cargarDonaciones() {
         const res = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones`);
         const datos = await res.json();
         const cuerpo = document.getElementById('tabla-donaciones');
+
+        if (!cuerpo) return;
 
         cuerpo.innerHTML = datos.map(d => {
             const fechaFormateada = d.fecha ? new Date(d.fecha).toLocaleDateString('es-AR') : 'N/A';
@@ -24,6 +65,9 @@ async function cargarDonaciones() {
             const estadoActual = d.estado || 'Pendiente';
             const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
 
+            // Nota: Usamos d.id o d._id dependiendo de cómo venga en tu backend de MongoDB/SQL
+            const idDonacion = d.id || d._id;
+
             return `
                 <tr>
                     <td><strong>${d.nombre || 'Anónimo'}</strong></td>
@@ -33,7 +77,7 @@ async function cargarDonaciones() {
                         <div style="font-size: 0.85rem;">📞 ${telefonoMostrar}</div>
                         <div style="font-size: 0.85rem; color: #555;">✉️ ${correoMostrar}</div>
                     </td>
-                    <td>${d.categoria}</td>
+                    <td>${d.categoria || 'N/D'}</td>
                     <td style="font-weight: bold; color: #4a2c35;">${d.cantidad || 0}</td>
                     <td>
                         <div style="max-width: 180px; font-size: 0.85rem; color: #444; word-wrap: break-word;" title="${descripcionMostrar}">
@@ -45,7 +89,7 @@ async function cargarDonaciones() {
                         ${
                             esFinal 
                             ? `<span style="font-size: 0.85rem; color: #666; font-style: italic;">🔒 Cerrado</span>`
-                            : `<button class="dropdown-toggle" onclick="manejarClickCambiar(${d.id}, '${estadoActual}')">CAMBIAR ▾</button>`
+                            : `<button class="dropdown-toggle" onclick="manejarClickCambiar('${idDonacion}', '${estadoActual}')">CAMBIAR ▾</button>`
                         }
                     </td>
                 </tr>
@@ -61,13 +105,22 @@ async function cargarDonaciones() {
 // ==========================================
 async function cambiarEstado(id, nuevoEstado, motivoRechazo = null) {
     try {
-        // Obtenemos el nombre del usuario logueado almacenado en el navegador.
-        // (Asegurate de que la clave del localStorage coincida con la que usaste al hacer el login).
-        const usuarioLogueado = localStorage.getItem('nombreUsuario') || localStorage.getItem('usuario') || 'Administrador';
+        // Obtenemos de forma segura el nombre del usuario responsable actual
+        const sesionData = sessionStorage.getItem('usuarioLogueado') || localStorage.getItem('usuarioLogueado');
+        let usuarioResponsable = 'Administrador';
+
+        if (sesionData) {
+            try {
+                const parsed = JSON.parse(sesionData);
+                usuarioResponsable = parsed.nombre || parsed.nombre_usuario || 'Administrador';
+            } catch (e) {
+                usuarioResponsable = sesionData;
+            }
+        }
 
         const bodyData = { 
             nuevoEstado: nuevoEstado,
-            actualizado_por: usuarioLogueado // <--- Enviamos el responsable real al servidor
+            actualizado_por: usuarioResponsable // <--- Enviamos el responsable real al servidor
         };
 
         if (nuevoEstado === 'Rechazado' && motivoRechazo) {
@@ -127,10 +180,9 @@ function abrirModal(id, estadoActual) {
 
         const esSeleccionado = (actualNorm === estNorm);
 
-        // Si es "Rechazado", en lugar de un prompt feo, llamamos a una función que dibuja el cajoncito integrado
-        let clickAccion = `cambiarEstado(${id}, '${est}')`;
+        let clickAccion = `cambiarEstado('${id}', '${est}')`;
         if (est === 'Rechazado' && !isDisabled) {
-            clickAccion = `mostrarCajonRechazo(${id})`;
+            clickAccion = `mostrarCajonRechazo('${id}')`;
         }
 
         return `
@@ -143,18 +195,18 @@ function abrirModal(id, estadoActual) {
     }).join('');
 
     const modal = document.getElementById('modalEstado');
-    modal.style.display = 'flex';
-    
-    setTimeout(() => {
-        modal.classList.add('active');
-    }, 10);
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('active');
+        }, 10);
+    }
 }
 
 // Muestra de manera elegante y centrada el cajoncito de texto dentro del mismo modal
 function mostrarCajonRechazo(id) {
     const modalOpciones = document.getElementById('modalOpciones');
     
-    // Forzamos un diseño limpio y centrado, limpiando cualquier residuo anterior
     modalOpciones.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; align-items: stretch; text-align: left;">
             <label for="motivoTextarea" style="font-weight: bold; font-size: 0.95rem; color: #333;">
@@ -165,11 +217,11 @@ function mostrarCajonRechazo(id) {
                 onfocus="this.style.borderColor='#dc3545'" onblur="this.style.borderColor='#ced4da'"></textarea>
             
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 5px;">
-                <button type="button" onclick="abrirModal(${id}, 'Recibido')" 
+                <button type="button" onclick="abrirModal('${id}', 'Recibido')" 
                     style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
                     Cancelar
                 </button>
-                <button type="button" onclick="confirmarRechazoConMotivo(${id})" 
+                <button type="button" onclick="confirmarRechazoConMotivo('${id}')" 
                     style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">
                     Confirmar Rechazo
                 </button>
@@ -177,7 +229,6 @@ function mostrarCajonRechazo(id) {
         </div>
     `;
     
-    // Autoenfocar el textarea con un pequeño respiro para que la transición sea fluida
     setTimeout(() => {
         const txt = document.getElementById('motivoTextarea');
         if (txt) txt.focus();
@@ -200,12 +251,10 @@ function confirmarRechazoConMotivo(id) {
 
 function cerrarModal() {
     const modal = document.getElementById('modalEstado');
-    modal.classList.remove('active');
-    
-    setTimeout(() => {
-        modal.style.display = 'none';
-    }, 300);
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
 }
-
-// Ejecutamos la carga inicial
-cargarDonaciones();

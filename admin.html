@@ -48,27 +48,36 @@
 
         .nav-links {
             display: flex;
+            align-items: center;
             gap: 20px;
             font-weight: bold;
         }
 
-        /* Botón Volver estilizado abajo del contenedor */
-        .btn-volver {
-            display: block;
-            width: 150px;
-            margin: 20px auto 50px auto;
-            padding: 12px;
-            background: #1e8449;
+        /* Estilo para el nombre del usuario arriba a la derecha */
+        .user-name-display {
+            color: #4a2c35;
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        /* Botón Cerrar Sesión estilizado */
+        .btn-cerrar-sesion {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #cc0000;
             color: white;
             text-align: center;
             text-decoration: none;
+            border: none;
             border-radius: 6px;
             font-weight: bold;
+            cursor: pointer;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background 0.2s ease;
         }
 
-        .btn-volver:hover {
-            background: #145a32;
+        .btn-cerrar-sesion:hover {
+            background: #a30000;
         }
 
         /* Título */
@@ -197,7 +206,6 @@
             transition: background-color 0.2s ease, color 0.2s ease;
         }
 
-        /* 🟢 EFECTO VERDE AL PASAR EL CURSOR SOBRE BOTONES DISPONIBLES */
         .modal-btn:not(:disabled):hover {
             background-color: #28a745 !important;
             color: #ffffff !important;
@@ -250,6 +258,12 @@
         @media (max-width: 768px) {
             .navbar {
                 padding: 10px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .nav-links {
+                width: 100%;
+                justify-content: space-between;
             }
             .page-title h1 {
                 font-size: 1.8em;
@@ -285,7 +299,10 @@
             </div>
         </div>
         <div class="nav-links">
-            <a href="index.html" class="btn-volver" style="margin: 0; width: auto; padding: 10px 20px;">Volver al Inicio</a>
+            <!-- Nombre del usuario logueado -->
+            <span id="nombreUsuario" class="user-name-display"></span>
+            <!-- Botón de Cerrar Sesión -->
+            <button id="btnCerrarSesion" class="btn-cerrar-sesion">Cerrar Sesión</button>
         </div>
     </div>
 
