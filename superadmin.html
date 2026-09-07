@@ -67,6 +67,11 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #b71c1c;
         }
 
         /* Navegación por pestañas */
@@ -225,7 +230,7 @@
             font-size: 0.8rem;
         }
 
-        /* Modal estilizado idéntico al login */
+        /* Modal de Alerta Animado (Feedback) */
         #feedbackOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -253,6 +258,44 @@
         .feedback-modal.error .svg-icon { stroke: #d32f2f; }
         .feedback-modal h3 { margin: 0 0 0.5rem 0; font-size: 1.3rem; }
         .feedback-modal p { margin: 0; color: #666; font-size: 0.9rem; }
+
+        /* --- ESTILOS PARA EL NUEVO MODAL DE CIERRE DE SESIÓN ELEGANTE --- */
+        .modal-overlay-logout {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999999;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content-logout {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 340px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #333;
+        }
+
+        .modal-overlay-logout.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-overlay-logout.active .modal-content-logout {
+            transform: scale(1);
+        }
     </style>
 </head>
 <body>
@@ -373,6 +416,26 @@
         </div>
     </div>
 
+    <!-- NUEVO VENTANA FLOTANTE (MODAL) PARA CERRAR SESIÓN -->
+    <div id="modalCerrarSesion" class="modal-overlay-logout">
+        <div class="modal-content-logout">
+            <div style="font-size: 3rem; margin-bottom: 10px;">👋</div>
+            <h3 style="color: #4a2c35; margin-bottom: 10px; font-size: 1.2rem;">¿Cerrar Sesión?</h3>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Estás a punto de salir del sistema. ¿Deseas continuar?</p>
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" onclick="cerrarModalCerrarSesion()" 
+                    style="flex: 1; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
+                    Cancelar
+                </button>
+                <button type="button" id="btnConfirmarLogout" 
+                    style="flex: 1; padding: 10px; background: #cc0000; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">
+                    Sí, Salir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Caché global para almacenar las donaciones y consultarlas en el modal de detalles
         let donacionesCache = [];
@@ -390,10 +453,33 @@
             }
         }
 
-        document.getElementById('btnLogout').addEventListener('click', () => {
-            sessionStorage.removeItem('usuarioLogueado');
-            window.location.href = 'login.html';
-        });
+        // Lógica del Modal Elegante para Cerrar Sesión
+        const btnLogout = document.getElementById('btnLogout');
+        const modalCerrarSesion = document.getElementById('modalCerrarSesion');
+        const btnConfirmarLogout = document.getElementById('btnConfirmarLogout');
+
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                if (modalCerrarSesion) {
+                    modalCerrarSesion.style.display = 'flex';
+                    setTimeout(() => modalCerrarSesion.classList.add('active'), 10);
+                }
+            });
+        }
+
+        function cerrarModalCerrarSesion() {
+            if (modalCerrarSesion) {
+                modalCerrarSesion.classList.remove('active');
+                setTimeout(() => { modalCerrarSesion.style.display = 'none'; }, 300);
+            }
+        }
+
+        if (btnConfirmarLogout) {
+            btnConfirmarLogout.addEventListener('click', () => {
+                sessionStorage.removeItem('usuarioLogueado');
+                window.location.href = 'index.html';
+            });
+        }
 
         // 2. Control de Pestañas
         function switchTab(tabId, event) {
@@ -498,7 +584,6 @@
 
         async function cambiarEstadoDonacion(id, nuevoEstado) {
             try {
-                // Obtenemos los datos del usuario actual desde sessionStorage para enviarlos al backend
                 const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
                 const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
 
@@ -507,7 +592,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         estado: nuevoEstado,
-                        actualizado_por: nombreUsuarioActual // Enviamos el nombre del usuario que hace el cambio
+                        actualizado_por: nombreUsuarioActual
                     })
                 });
                 if (!response.ok) throw new Error('No se pudo actualizar el estado');
