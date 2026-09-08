@@ -107,6 +107,11 @@
             background-color: #351f26;
         }
 
+        button[type="submit"]:disabled {
+            background-color: #8c737a;
+            cursor: not-allowed;
+        }
+
         .back-link {
             display: block;
             text-align: center;
@@ -235,12 +240,12 @@
         <form id="loginForm">
             <div class="form-group">
                 <label for="nombre_usuario">Nombre de Usuario</label>
-                <input type="text" id="nombre_usuario" required autocomplete="username" placeholder="  ">
+                <input type="text" id="nombre_usuario" required autocomplete="username" placeholder="">
             </div>
             
             <div class="form-group">
                 <label for="contrasena">Contraseña</label>
-                <input type="password" id="contrasena" required autocomplete="current-password" placeholder="  ">
+                <input type="password" id="contrasena" required autocomplete="current-password" placeholder="">
             </div>
 
             <button type="submit" id="btnSubmit">Entrar al Sistema</button>
@@ -300,7 +305,7 @@
             btnSubmit.textContent = 'Verificando...';
 
             const nombre_usuario = document.getElementById('nombre_usuario').value.trim();
-            const contrasena = document.getElementById('contrasena').value.trim();
+            const contrasena = document.getElementById('contrasena').value; // Sin trim por seguridad de caracteres especiales
 
             try {
                 const response = await fetch('https://back-hospital-euk1.onrender.com/api/login', {
@@ -315,9 +320,11 @@
                     throw new Error(data.error || 'Credenciales incorrectas');
                 }
 
+                // Guardar datos de sesión e incluir token si el backend lo provee
                 sessionStorage.setItem('usuarioLogueado', JSON.stringify({
                     nombre: data.nombre,
-                    rol: data.rol
+                    rol: data.rol,
+                    token: data.token || null
                 }));
 
                 // Éxito: Animación y redirección según rol exacto
