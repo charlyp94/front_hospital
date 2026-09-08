@@ -37,7 +37,7 @@
 
         .login-card {
             background: #ffffff;
-            padding: 2.5rem;
+            padding: 2.5rem 2rem;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             width: 100%;
@@ -45,25 +45,43 @@
             box-sizing: border-box;
             color: #333;
             position: relative;
+            text-align: center;
+        }
+
+        /* Estilo para el logo del hospital arriba del login */
+        .login-logo {
+            width: 75px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin: 0 auto 1rem auto;
+            display: block;
+            border: 2px solid #4a2c35;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .login-card h2 {
             margin-top: 0;
             color: #4a2c35;
-            text-align: center;
             font-size: 1.3rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .login-card h2.subtitle-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.4rem;
         }
 
         .login-card p.subtitle {
-            text-align: center;
             color: #666;
             font-size: 0.85rem;
             margin-bottom: 1.5rem;
+            margin-top: 0;
         }
 
         .form-group {
             margin-bottom: 1.2rem;
+            text-align: left;
         }
 
         .form-group label {
@@ -233,8 +251,11 @@
 <body>
 
     <div class="login-card">
+        <!-- Logo del Hospital añadido -->
+        <img src="logo.jpg" alt="Logo Hospital" class="login-logo">
+        
         <h2>SISGESD</h2>
-        <h2>Acceso Panel de Gestión</h2>
+        <h2 class="subtitle-title">Acceso Panel de Gestión</h2>
         <p class="subtitle">Ingrese sus credenciales para continuar</p>
         
         <form id="loginForm">
@@ -305,7 +326,7 @@
             btnSubmit.textContent = 'Verificando...';
 
             const nombre_usuario = document.getElementById('nombre_usuario').value.trim();
-            const contrasena = document.getElementById('contrasena').value; // Sin trim por seguridad de caracteres especiales
+            const contrasena = document.getElementById('contrasena').value;
 
             try {
                 const response = await fetch('https://back-hospital-euk1.onrender.com/api/login', {
@@ -320,14 +341,12 @@
                     throw new Error(data.error || 'Credenciales incorrectas');
                 }
 
-                // Guardar datos de sesión e incluir token si el backend lo provee
                 sessionStorage.setItem('usuarioLogueado', JSON.stringify({
                     nombre: data.nombre,
                     rol: data.rol,
                     token: data.token || null
                 }));
 
-                // Éxito: Animación y redirección según rol exacto
                 mostrarModalTemporal('success', '¡Acceso Concedido!', `Bienvenido, ${data.nombre}`, () => {
                     if (data.rol === 'superadmin') {
                         window.location.href = 'superadmin.html'; 
