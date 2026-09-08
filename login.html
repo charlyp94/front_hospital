@@ -107,6 +107,46 @@
             box-shadow: 0 0 0 2px rgba(74, 44, 53, 0.2);
         }
 
+        /* Contenedor relativo para el input de contraseña y el botón del ojo */
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-container input {
+            padding-right: 45px; /* Espacio para que el texto no se pise con el botón */
+        }
+
+        /* Botón del ojito */
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: color 0.2s;
+        }
+
+        .toggle-password:hover {
+            color: #4a2c35;
+        }
+
+        .toggle-password svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         button[type="submit"] {
             width: 100%;
             padding: 0.75rem;
@@ -251,7 +291,7 @@
 <body>
 
     <div class="login-card">
-        <!-- Logo del Hospital añadido -->
+        <!-- Logo del Hospital -->
         <img src="logo.jpg" alt="Logo Hospital" class="login-logo">
         
         <h2>SISGESD</h2>
@@ -266,7 +306,16 @@
             
             <div class="form-group">
                 <label for="contrasena">Contraseña</label>
-                <input type="password" id="contrasena" required autocomplete="current-password" placeholder="">
+                <div class="password-container">
+                    <input type="password" id="contrasena" required autocomplete="current-password" placeholder="">
+                    <button type="button" id="togglePasswordBtn" class="toggle-password" title="Mostrar contraseña">
+                        <!-- Icono de Ojo Abierto por defecto -->
+                        <svg id="eyeIcon" viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" id="btnSubmit">Entrar al Sistema</button>
@@ -292,6 +341,33 @@
         const feedbackTitle = document.getElementById('feedbackTitle');
         const feedbackText = document.getElementById('feedbackText');
         const btnSubmit = document.getElementById('btnSubmit');
+
+        // Lógica para mostrar / ocultar contraseña
+        const passwordInput = document.getElementById('contrasena');
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            
+            if (isPassword) {
+                passwordInput.type = 'text';
+                togglePasswordBtn.title = 'Ocultar contraseña';
+                // Cambiar a ícono de Ojo Tachado
+                eyeIcon.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                `;
+            } else {
+                passwordInput.type = 'password';
+                togglePasswordBtn.title = 'Mostrar contraseña';
+                // Volver a ícono de Ojo Abierto
+                eyeIcon.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                `;
+            }
+        });
 
         function mostrarModalTemporal(tipo, titulo, mensaje, callback) {
             feedbackModalBox.className = `feedback-modal ${tipo}`;
