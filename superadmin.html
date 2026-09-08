@@ -259,7 +259,7 @@
         .feedback-modal h3 { margin: 0 0 0.5rem 0; font-size: 1.3rem; }
         .feedback-modal p { margin: 0; color: #666; font-size: 0.9rem; }
 
-        /* --- ESTILOS PARA EL NUEVO MODAL DE CIERRE DE SESIÓN ELEGANTE --- */
+        /* --- ESTILOS ACTUALIZADOS PARA EL MODAL DE CIERRE DE SESIÓN (ESTILO IMAGEN) --- */
         .modal-overlay-logout {
             display: none;
             position: fixed;
@@ -267,7 +267,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 999999;
             justify-content: center;
             align-items: center;
@@ -276,15 +276,15 @@
         }
 
         .modal-content-logout {
-            background: white;
-            padding: 25px 20px;
-            border-radius: 12px;
-            width: 85%;
-            max-width: 340px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            background: #ffffff;
+            padding: 35px 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             text-align: center;
-            transform: scale(0.8);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
             color: #333;
         }
 
@@ -295,6 +295,21 @@
 
         .modal-overlay-logout.active .modal-content-logout {
             transform: scale(1);
+        }
+
+        .logout-icon-circle {
+            width: 65px;
+            height: 65px;
+            background-color: #fff8e1;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px auto;
+            color: #f39c12;
+            font-size: 32px;
+            font-weight: bold;
+            border: 2px solid #fef3c7;
         }
     </style>
 </head>
@@ -416,21 +431,21 @@
         </div>
     </div>
 
-    <!-- NUEVO VENTANA FLOTANTE (MODAL) PARA CERRAR SESIÓN -->
+    <!-- MODAL DE CIERRE DE SESIÓN ACTUALIZADO (ESTILO IMAGEN) -->
     <div id="modalCerrarSesion" class="modal-overlay-logout">
         <div class="modal-content-logout">
-            <div style="font-size: 3rem; margin-bottom: 10px;">👋</div>
-            <h3 style="color: #4a2c35; margin-bottom: 10px; font-size: 1.2rem;">¿Cerrar Sesión?</h3>
-            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Estás a punto de salir del sistema. ¿Deseas continuar?</p>
+            <div class="logout-icon-circle">!</div>
+            <h3 style="font-size: 1.5rem; color: #2d3748; margin-bottom: 10px;">¿Cerrar sesión?</h3>
+            <p style="color: #718096; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.4;">¿Estás seguro de que deseas salir del panel de administración?</p>
             
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button type="button" onclick="cerrarModalCerrarSesion()" 
-                    style="flex: 1; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
-                    Cancelar
-                </button>
+            <div style="display: flex; gap: 12px; justify-content: center;">
                 <button type="button" id="btnConfirmarLogout" 
-                    style="flex: 1; padding: 10px; background: #cc0000; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">
-                    Sí, Salir
+                    style="flex: 1; padding: 12px; background-color: #e53e3e; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                    Sí, salir
+                </button>
+                <button type="button" onclick="cerrarModalCerrarSesion()" 
+                    style="flex: 1; padding: 12px; background-color: #e2e8f0; color: #4a5568; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                    Cancelar
                 </button>
             </div>
         </div>
