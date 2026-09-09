@@ -117,6 +117,27 @@
             display: block;
         }
 
+        /* Bloques separados dentro de pestañas */
+        .section-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .section-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-card h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid #f1f3f5;
+            padding-bottom: 10px;
+        }
+
         /* Tablas */
         table {
             width: 100%;
@@ -241,77 +262,85 @@
 
         <!-- Pestaña 1: Donaciones -->
         <div id="tab-donaciones" class="tab-content active">
-            <h2>Historial Completo de Donaciones</h2>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Donante</th>
-                            <th>Detalle / Elementos</th>
-                            <th>Fecha</th>
-                            <th>Estado</th>
-                            <th>Modificado por</th>
-                            <th>Acciones de Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaDonaciones">
-                        <!-- Se llena dinámicamente -->
-                    </tbody>
-                </table>
+            <div class="section-card">
+                <h2>Historial Completo de Donaciones</h2>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Donante</th>
+                                <th>Detalle / Elementos</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Modificado por</th>
+                                <th>Acciones de Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaDonaciones">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Pestaña 2: Usuarios -->
         <div id="tab-usuarios" class="tab-content">
-            <h2>Crear Nuevo Usuario</h2>
-            <form id="formCrearUsuario">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="nuevoNombre">Nombre Completo</label>
-                        <input type="text" id="nuevoNombre" required>
+            <!-- Bloque superior: Crear Usuario -->
+            <div class="section-card">
+                <h2>Crear Nuevo Usuario</h2>
+                <form id="formCrearUsuario">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nuevoNombre">Nombre Completo</label>
+                            <input type="text" id="nuevoNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nuevoUsername">Nombre de Usuario</label>
+                            <input type="text" id="nuevoUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nuevoDni">DNI</label>
+                            <input type="text" id="nuevoDni" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nuevoPassword">Contraseña</label>
+                            <input type="password" id="nuevoPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nuevoRol">Rol</label>
+                            <select id="nuevoRol" required>
+                                <option value="usuario">Usuario Estándar</option>
+                                <option value="admin">Administrador</option>
+                                <option value="superadmin">Super Administrador</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="nuevoUsername">Nombre de Usuario</label>
-                        <input type="text" id="nuevoUsername" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nuevoDni">DNI</label>
-                        <input type="text" id="nuevoDni" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nuevoPassword">Contraseña</label>
-                        <input type="password" id="nuevoPassword" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nuevoRol">Rol</label>
-                        <select id="nuevoRol" required>
-                            <option value="usuario">Usuario Estándar</option>
-                            <option value="admin">Administrador</option>
-                            <option value="superadmin">Super Administrador</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Registrar Usuario</button>
-            </form>
+                    <button type="submit" class="btn btn-primary">Registrar Usuario</button>
+                </form>
+            </div>
 
-            <h2 style="margin-top: 40px;">Usuarios del Sistema</h2>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Usuario</th>
-                            <th>DNI</th>
-                            <th>Rol</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaUsuarios">
-                        <!-- Se llena dinámicamente -->
-                    </tbody>
-                </table>
+            <!-- Bloque inferior: Lista de Usuarios -->
+            <div class="section-card">
+                <h2>Usuarios del Sistema</h2>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Usuario</th>
+                                <th>DNI</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuarios">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
