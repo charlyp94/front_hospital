@@ -425,12 +425,10 @@
                 window.location.href = 'index.html';
             }
         }
-
         // Lógica del Modal Elegante para Cerrar Sesión
         const btnLogout = document.getElementById('btnLogout');
         const modalCerrarSesion = document.getElementById('modalCerrarSesion');
         const btnConfirmarLogout = document.getElementById('btnConfirmarLogout');
-
         if (btnLogout) {
             btnLogout.addEventListener('click', () => {
                 if (modalCerrarSesion) {
@@ -439,80 +437,64 @@
                 }
             });
         }
-
         function cerrarModalCerrarSesion() {
             if (modalCerrarSesion) {
                 modalCerrarSesion.classList.remove('active');
                 setTimeout(() => { modalCerrarSesion.style.display = 'none'; }, 300);
             }
         }
-
         if (btnConfirmarLogout) {
             btnConfirmarLogout.addEventListener('click', () => {
                 sessionStorage.removeItem('usuarioLogueado');
                 window.location.href = 'index.html';
             });
         }
-
         // 2. Control de Pestañas
         function switchTab(tabId, event) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));   
             document.getElementById(`tab-${tabId}`).classList.add('active');
             event.currentTarget.classList.add('active');
         }
-
         // 3. Sistema de Modales de Feedback
         function mostrarModalTemporal(tipo, titulo, mensaje) {
             const overlay = document.getElementById('feedbackOverlay');
             const box = document.getElementById('feedbackModalBox');
-            const icon = document.getElementById('iconContainer');
-            
+            const icon = document.getElementById('iconContainer');   
             box.className = `feedback-modal ${tipo}`;
             document.getElementById('feedbackTitle').textContent = titulo;
             document.getElementById('feedbackText').textContent = mensaje;
-
             if (tipo === 'success') {
                 icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>`;
             } else {
                 icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
             }
-
             overlay.classList.add('active');
             setTimeout(() => overlay.classList.remove('active'), 1500);
         }
-
         // 4. API: Cargar Donaciones
         async function cargarDonaciones() {
             try {
                 const response = await fetch('https://back-hospital-euk1.onrender.com/api/donaciones');
                 if (!response.ok) throw new Error('Error al conectar con el servidor');
-                const donaciones = await response.json();
-                
+                const donaciones = await response.json();       
                 donacionesCache = donaciones; // Guardamos en caché
-                
                 const tbody = document.getElementById('tablaDonaciones');
                 tbody.innerHTML = '';
-
                 if (donaciones.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay donaciones registradas.</td></tr>';
                     return;
                 }
-
                 donaciones.forEach(item => {
                     const estadoActual = item.estado || 'Pendiente';
                     const estadoClase = estadoActual.toLowerCase().includes('aprobado') ? 'aprobado' : (estadoActual.toLowerCase().includes('rechazado') ? 'rechazado' : 'pendiente');
                     const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
-
                     // Responsable de la modificación
                     const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por;
-                    
                     let responsableHtml = '<span style="color: #888; font-size: 0.85rem; font-style: italic;">Sin modificar</span>';
                     if (responsable) {
                         responsableHtml = `<span style="font-weight: 600; color: #4a2c35;">👤 ${responsable}</span>`;
                     }
-
                     let selectHtml = '';
                     if (esFinal) {
                         selectHtml = `<span style="font-size: 0.85rem; color: #666; font-style: italic;">🔒 Cerrado (${estadoActual})</span>`;
@@ -532,7 +514,6 @@
                             </select>
                         `;
                     }
-
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>#${item.id || item._id}</td>
@@ -554,12 +535,10 @@
                 document.getElementById('tablaDonaciones').innerHTML = '<tr><td colspan="7" style="text-align: center; color: #d32f2f;">No se pudieron cargar las donaciones.</td></tr>';
             }
         }
-
         async function cambiarEstadoDonacion(id, nuevoEstado) {
             try {
                 const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
                 const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
-
                 const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -569,30 +548,24 @@
                     })
                 });
                 if (!response.ok) throw new Error('No se pudo actualizar el estado');
-                
                 mostrarModalTemporal('success', '¡Estado Actualizado!', `La donación ahora figura como: ${nuevoEstado}`);
                 cargarDonaciones();
             } catch (error) {
                 mostrarModalTemporal('error', 'Error', 'No se pudo actualizar el estado de la donación.');
             }
         }
-
         // Modal de detalles con el nombre exacto de la persona que modificó
         function verDetallesDonacion(id) {
             const item = donacionesCache.find(d => (d.id == id || d._id == id));
             if (!item) return;
-
             let descripcionLimpia = item.descripcion || 'Sin descripción';
             let motivoRechazoTexto = 'Ninguno';
-
             if (descripcionLimpia.includes('[RECHAZADO:')) {
                 const partes = descripcionLimpia.split('| [RECHAZADO:');
                 descripcionLimpia = partes[0].trim();
                 motivoRechazoTexto = partes[1].replace(']', '').trim();
             }
-
             const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por || 'Sin modificar';
-
             let modalDetalle = document.getElementById('modalDetallesDonacion');
             if (!modalDetalle) {
                 modalDetalle = document.createElement('div');
@@ -603,11 +576,9 @@
                 `;
                 document.body.appendChild(modalDetalle);
             }
-
             modalDetalle.innerHTML = `
                 <div style="background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: inherit; color: #333; max-height: 90vh; overflow-y: auto;">
-                    <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Detalles de la Donación #${item.id || item._id}</h3>
-                    
+                    <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Detalles de la Donación #${item.id || item._id}</h3>       
                     <div style="margin: 15px 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; color: #444;">
                         <div><strong>Donante:</strong> ${item.nombre || 'Anónimo'}</div>
                         <div><strong>Tipo:</strong> ${item.tipo_donante || 'N/D'}</div>
@@ -620,10 +591,8 @@
                         <div><strong>Fecha de registro:</strong> ${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</div>
                         <div><strong>Estado Actual:</strong> <span style="font-weight: bold; color: #007bff;">${item.estado || 'Pendiente'}</span></div>
                         <div><strong>Modificado por:</strong> <span style="color: #4a2c35; font-weight: 600;">${responsable}</span></div>
-
                         ${item.estado === 'Rechazado' ? `<div style="background: #ffe6e6; padding: 8px; border-radius: 4px; color: #d32f2f; margin-top: 5px;"><strong>Motivo de Rechazo:</strong> ${motivoRechazoTexto}</div>` : ''}
                     </div>
-
                     <div style="text-align: right; margin-top: 20px;">
                         <button onclick="document.getElementById('modalDetallesDonacion').remove()" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
                             Cerrar
@@ -633,22 +602,18 @@
             `;
             modalDetalle.style.display = 'flex';
         }
-
         // 5. API: Gestión de Usuarios
         async function cargarUsuarios() {
             try {
                 const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios');
                 if (!response.ok) throw new Error('Error al obtener usuarios');
                 const usuarios = await response.json();
-
                 const tbody = document.getElementById('tablaUsuarios');
                 tbody.innerHTML = '';
-
                 if (usuarios.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay usuarios registrados.</td></tr>';
                     return;
                 }
-
                 usuarios.forEach(user => {
                     const rolClase = user.rol ? user.rol.toLowerCase() : 'usuario';
                     const tr = document.createElement('tr');
@@ -669,7 +634,6 @@
                 document.getElementById('tablaUsuarios').innerHTML = '<tr><td colspan="6" style="text-align: center; color: #d32f2f;">Error al cargar usuarios.</td></tr>';
             }
         }
-
         document.getElementById('formCrearUsuario').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nombre = document.getElementById('nuevoNombre').value.trim();
@@ -677,17 +641,14 @@
             const dni = document.getElementById('nuevoDni').value.trim();
             const contrasena = document.getElementById('nuevoPassword').value.trim();
             const rol = document.getElementById('nuevoRol').value;
-
             try {
                 const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nombre, nombre_usuario, dni, contrasena, rol })
                 });
-
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'No se pudo crear el usuario');
-
                 mostrarModalTemporal('success', '¡Usuario Creado!', `Se registró exitosamente a ${nombre}`);
                 document.getElementById('formCrearUsuario').reset();
                 cargarUsuarios();
@@ -695,23 +656,19 @@
                 mostrarModalTemporal('error', 'Error', error.message || 'No se pudo crear el usuario.');
             }
         });
-
         async function eliminarUsuario(id) {
             if (!confirm('¿Estás seguro de que deseas eliminar este usuario del sistema?')) return;
-
             try {
                 const response = await fetch(`https://back-hospital-euk1.onrender.com/api/usuarios/${id}`, {
                     method: 'DELETE'
                 });
                 if (!response.ok) throw new Error('No se pudo eliminar el usuario');
-
                 mostrarModalTemporal('success', 'Usuario Eliminado', 'El usuario fue removido correctamente.');
                 cargarUsuarios();
             } catch (error) {
                 mostrarModalTemporal('error', 'Error', 'No se pudo eliminar el usuario.');
             }
         }
-
         cargarDonaciones();
         cargarUsuarios();
     </script>
