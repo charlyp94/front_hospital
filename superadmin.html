@@ -414,7 +414,6 @@
     <script>
         // Caché global para almacenar las donaciones y consultarlas en el modal de detalles
         let donacionesCache = [];
-
         // 1. Control de Sesión
         const usuarioSesion = sessionStorage.getItem('usuarioLogueado');
         if (!usuarioSesion) {
@@ -422,7 +421,6 @@
         } else {
             const datosUser = JSON.parse(usuarioSesion);
             document.getElementById('saludoUsuario').textContent = `${datosUser.nombre} (${datosUser.rol})`;
-            
             if (datosUser.rol !== 'superadmin' && datosUser.rol !== 'admin') {
                 window.location.href = 'index.html';
             }
