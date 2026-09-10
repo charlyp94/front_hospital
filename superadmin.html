@@ -282,7 +282,6 @@
     </style>
 </head>
 <body>
-
     <header>
         <h1>SISGESD - Panel de Administración General</h1>
         <div class="user-info">
@@ -290,12 +289,10 @@
             <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
         </div>
     </header>
-
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('donaciones', event)">📦 Gestión de Donaciones</button>
         <button class="tab-btn" onclick="switchTab('usuarios', event)">👥 Gestión de Usuarios</button>
     </div>
-
     <main>
         <!-- SECCIÓN 1: DONACIONES -->
         <section id="tab-donaciones" class="tab-content active">
@@ -324,7 +321,6 @@
                 </div>
             </div>
         </section>
-
         <!-- SECCIÓN 2: USUARIOS -->
         <section id="tab-usuarios" class="tab-content">
             <!-- Formulario Crear Usuario -->
@@ -362,7 +358,6 @@
                     <button type="submit" class="btn">Registrar Usuario</button>
                 </form>
             </div>
-
             <!-- Listado de Usuarios -->
             <div class="card-container">
                 <div class="card-header">
@@ -389,7 +384,6 @@
             </div>
         </section>
     </main>
-
     <!-- Modal de Alerta Animado -->
     <div id="feedbackOverlay">
         <div class="feedback-modal" id="feedbackModalBox">
@@ -398,7 +392,6 @@
             <p id="feedbackText">Mensaje</p>
         </div>
     </div>
-
     <!-- MODAL DE CIERRE DE SESIÓN ACTUALIZADO (ESTILO IMAGEN) -->
     <div id="modalCerrarSesion" class="modal-overlay-logout">
         <div class="modal-content-logout">
@@ -418,7 +411,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // Caché global para almacenar las donaciones y consultarlas en el modal de detalles
         let donacionesCache = [];
