@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +12,6 @@
             background-color: #4a2c35;
             color: #333;
         }
-
         body::before {
             content: "";
             position: fixed;
@@ -32,7 +30,6 @@
             z-index: -1;
             pointer-events: none;
         }
-
         /* Barra superior */
         .navbar {
             background: white;
@@ -41,25 +38,21 @@
             align-items: center;
             justify-content: space-between;
         }
-
         .navbar img {
             width: 50px;
         }
-
         .nav-links {
             display: flex;
             align-items: center;
             gap: 20px;
             font-weight: bold;
         }
-
         /* Estilo para el nombre del usuario arriba a la derecha */
         .user-name-display {
             color: #4a2c35;
             font-size: 0.95rem;
             font-weight: bold;
         }
-
         /* Botón Cerrar Sesión estilizado */
         .btn-cerrar-sesion {
             display: inline-block;
@@ -75,7 +68,6 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             transition: background 0.2s ease;
         }
-
         .btn-cerrar-sesion:hover {
             background: #a30000;
         }
@@ -94,24 +86,20 @@
             font-size: 0.9rem;
             transition: background 0.2s;
         }
-
         .enlace-manual:hover {
             background-color: #b71c1c;
             color: white; /* Asegura que el texto siga blanco al pasar el mouse */
         }
-
         /* Título */
         .page-title {
             text-align: center;
             color: white;
             padding: 40px 0;
         }
-
         .page-title h1 {
             margin: 0;
             font-size: 2.5em;
         }
-
         /* Contenedor de la tabla ampliado para albergar más columnas */
         .table-container {
             max-width: 1250px;
@@ -121,36 +109,30 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
-
         .table-responsive {
             width: 100%;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
         }
-
         th {
             background-color: #332126;
             color: white;
             padding: 15px;
             font-size: 0.95rem;
         }
-
         td {
             border-bottom: 1px solid #ddd;
             padding: 15px;
             text-align: center;
             font-size: 0.9rem;
         }
-
         /* Estilo del botón CAMBIAR */
         .dropdown-container {
             position: relative;
             display: inline-block;
         }
-
         .dropdown-toggle {
             background-color: #09cf37;
             color: white;
@@ -162,11 +144,9 @@
             font-size: 14px;
             transition: background-color 0.2s ease;
         }
-
         .dropdown-toggle:hover {
             background-color: #037b23;
         }
-
         /* --- VENTANA FLOTANTE (MODAL) CON ANIMACIÓN FLUIDA UNIVERSAL --- */
         .modal-overlay {
             display: none;
@@ -182,7 +162,6 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-
         .modal-content {
             background: white;
             padding: 25px 20px;
@@ -194,23 +173,19 @@
             transform: scale(0.8);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
         .modal-overlay.active {
             display: flex;
             opacity: 1;
         }
-
         .modal-overlay.active .modal-content {
             transform: scale(1);
         }
-
         .modal-content h3 {
             margin-top: 0;
             color: #4a2c35;
             font-size: 1.2rem;
             margin-bottom: 20px;
         }
-
         .modal-btn {
             display: block;
             width: 100%;
@@ -225,55 +200,45 @@
             color: #333;
             transition: background-color 0.2s ease, color 0.2s ease;
         }
-
         .modal-btn:not(:disabled):hover {
             background-color: #28a745 !important;
             color: #ffffff !important;
         }
-
         .modal-btn.selected {
             background-color: #09cf37;
             color: white;
         }
-
         .modal-btn.selected:hover {
             background-color: #037b23;
         }
-
         .modal-btn-cerrar {
             background-color: #cc0000;
             color: white;
             margin-top: 15px;
         }
-
         .modal-btn-cerrar:hover {
             background-color: #a30000;
         }
-
         .logo-container {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-
         .logo-img {
             height: 90px;
             width: 120px;
         }
-
         .logo-texto h2 {
             font-size: 1.1rem;
             font-weight: 800;
             letter-spacing: 0.5px;
             color: #111111;
         }
-
         .logo-texto p {
             font-size: 0.8rem;
             color: #555555;
             font-weight: 600;
         }
-
         /* --- ESTILOS ACTUALIZADOS PARA EL MODAL DE CIERRE DE SESIÓN --- */
         .modal-overlay-logout {
             display: none;
@@ -289,7 +254,6 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-
         .modal-content-logout {
             background: #ffffff;
             padding: 35px 30px;
@@ -302,16 +266,13 @@
             transition: transform 0.3s ease;
             color: #333;
         }
-
         .modal-overlay-logout.active {
             display: flex;
             opacity: 1;
         }
-
         .modal-overlay-logout.active .modal-content-logout {
             transform: scale(1);
         }
-
         .logout-icon-circle {
             width: 65px;
             height: 65px;
@@ -326,7 +287,6 @@
             font-weight: bold;
             border: 2px solid #fef3c7;
         }
-
         /* --- ADAPTACIÓN PARA CELULARES --- */
         @media (max-width: 768px) {
             .navbar {
@@ -360,9 +320,7 @@
         }
     </style>
 </head>
-
 <body>
-
     <div class="navbar">
         <div class="logo-container">
             <img src="logo.jpg" alt="Logo Hospital Luis A. Güemes" class="logo-img">
@@ -378,11 +336,9 @@
             <button id="btnCerrarSesion" class="btn-cerrar-sesion">Cerrar Sesión</button>
         </div>
     </div>
-
     <div class="page-title">
         <h1>Donaciones - Panel de Gestión</h1>
     </div>
-
     <div class="table-container">
         <div class="table-responsive">
             <table>
@@ -403,7 +359,6 @@
             </table>
         </div>
     </div>
-
     <!-- VENTANA FLOTANTE (MODAL) UNIVERSAL PARA CAMBIAR ESTADO -->
     <div id="modalEstado" class="modal-overlay">
         <div class="modal-content">
@@ -412,14 +367,12 @@
             <button class="modal-btn modal-btn-cerrar" onclick="cerrarModal()">Cancelar</button>
         </div>
     </div>
-
     <!-- VENTANA FLOTANTE ACTUALIZADA PARA CONFIRMAR CIERRE DE SESIÓN -->
     <div id="modalCerrarSesion" class="modal-overlay-logout">
         <div class="modal-content-logout">
             <div class="logout-icon-circle">!</div>
             <h3 style="font-size: 1.5rem; color: #2d3748; margin-bottom: 10px;">¿Cerrar sesión?</h3>
-            <p style="color: #718096; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.4;">¿Estás seguro de que deseas salir del panel de gestión?</p>
-            
+            <p style="color: #718096; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.4;">¿Estás seguro de que deseas salir del panel de gestión?</p>  
             <div style="display: flex; gap: 12px; justify-content: center;">
                 <button type="button" id="btnConfirmarLogout" 
                     style="flex: 1; padding: 12px; background-color: #e53e3e; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
@@ -432,10 +385,8 @@
             </div>
         </div>
     </div>
-
     <!-- 1. Cargar primero el archivo de configuración global -->
     <script src="config.js"></script>
-
     <!-- 2. Cargar después el script de administración -->
     <script src="admin.js"></script>
     <div style="display: flex; justify-content: center; gap: 15px; margin: 30px 0;">
@@ -448,5 +399,4 @@
         📖 Ver Manual de Usuario
     </a>
 </body>
-
 </html>
