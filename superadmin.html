@@ -64,7 +64,17 @@
             font-weight: 600;
             transition: background 0.2s;
         }
-        .btn-logout:hover {
+        .enlace-manual {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .enlace-manual:hover {
             background-color: #b71c1c;
         }
         /* Navegación por pestañas */
@@ -286,13 +296,13 @@
         <h1>SISGESD - Panel de Administración General</h1>
         <div class="user-info">
             <!-- Opción para descargarlo directo -->
-        <a href="./GUIA_USO_DONACIONES_HOSPITAL.pdf" download="Manual_Usuario_Hospital.pdf" class="btn-logout" style="display: none; text-decoration: none; align-items: center; gap: 6px;">
-             Descargar Manual
+        <a href="./GUIA_USO_DONACIONES_HOSPITAL.pdf" download="Manual_Usuario_Hospital.pdf" class="enlace-manual">
+            📥 Descargar Manual
         </a>
 
 <!-- O la opción para abrirlo en una pestaña nueva -->
-        <a href="./GUIA_USO_DONACIONES_HOSPITAL.pdf" target="_blank" rel="noopener noreferrer" class="btn-logout" style="display: none; text-decoration: none; align-items: center; gap: 6px;">
-             Ver Manual de Usuario
+        <a href="./GUIA_USO_DONACIONES_HOSPITAL.pdf" target="_blank" rel="noopener noreferrer" class="enlace-manual">
+            📖 Ver Manual de Usuario
         </a>
             <span id="saludoUsuario">Cargando...</span>
             <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
