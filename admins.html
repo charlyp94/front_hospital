@@ -73,6 +73,26 @@
         .btn-logout:hover {
             background-color: #b71c1c;
         }
+        .enlace-manual {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none; /* <--- IMPORTANTE: le saca el subrayado feo del enlace */
+            display: inline-flex;  /* <--- CLAVE: hace que actúe como un bloque compacto y no ocupe todo el ancho */
+            align-items: center;
+            gap: 8px;              /* Espacio entre el icono/emoji y el texto */
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .enlace-manual:hover {
+            background-color: #b71c1c;
+            color: white; /* Asegura que el texto siga blanco al pasar el mouse */
+        }
 
         /* Navegación por pestañas */
         .nav-tabs {
@@ -692,5 +712,14 @@
         cargarDonaciones();
         cargarUsuarios();
     </script>
+    <div style="display: flex; justify-content: center; gap: 15px; margin: 30px 0;">
+    <!-- Opción para descargarlo directo -->
+    <a href="./GUIA_USO_DONACIONES_HOSPITAL.pdf" download="Manual_Usuario_Hospital.pdf" class="enlace-manual">
+        📥 Descargar Manual
+    </a>
+    <!-- O la opción para abrirlo en una pestaña nueva -->
+    <a href="./GUIA_USO_DONACIONES_HOSPITAL.pdf" target="_blank" rel="noopener noreferrer" class="enlace-manual">
+        📖 Ver Manual de Usuario
+    </a>
 </body>
 </html>
