@@ -622,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalDetalle.style.display = 'flex';
     };
 
-    // 5. Evento para el botón de Generar Reporte por Periodo (Con filtros unificados y exactos)
+    // 5. Evento para el botón de Generar Reporte por Periodo (Mostrando el detalle de la donación)
     const btnReporte = document.getElementById('btnAbrirReporte');
     if (btnReporte) {
         btnReporte.addEventListener('click', async (e) => {
@@ -716,7 +716,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const fechaEmisionStr = new Date().toLocaleDateString('es-AR');
                     doc.text(`Fecha de emisión: ${fechaEmisionStr}`, 14, 38);
 
-                    // --- FILTROS UNIFICADOS Y EXACTOS ---
                     const listaAprobadas = donacionesFiltradas.filter(d => d.estado === 'Aprobado y Destinado');
                     const listaRechazadas = donacionesFiltradas.filter(d => d.estado === 'Rechazado');
 
@@ -747,7 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     doc.setFontSize(9);
                     doc.setTextColor(80, 80, 80);
                     doc.text("Donante / Categoría", 14, y);
-                    doc.text("Cantidad", 110, y);
+                    doc.text("Detalle de la Donación", 110, y); // Cabecera modificada
                     doc.text("Fecha", 170, y);
                     y += 2;
                     doc.setLineWidth(0.3);
@@ -765,11 +764,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         listaAprobadas.forEach(item => {
                             if (y > 270) { doc.addPage(); y = 20; }
                             const donanteCat = `${item.nombre || 'Anónimo'} (${item.categoria || 'General'})`;
-                            const cantText = `${item.cantidad || 1} un.`;
+                            
+                            // Limpieza del detalle (eliminando marcas de rechazo si existieran por seguridad)
+                            let detalleTexto = item.descripcion || item.elementos || 'Sin detalle';
+                            if (detalleTexto.includes('[RECHAZADO:')) {
+                                detalleTexto = detalleTexto.split('| [RECHAZADO:')[0].trim();
+                            }
+
                             const fecText = item.fecha ? new Date(item.fecha).toLocaleDateString('es-AR') : 'N/D';
 
-                            doc.text(donanteCat.substring(0, 60), 14, y);
-                            doc.text(cantText, 110, y);
+                            doc.text(donanteCat.substring(0, 50), 14, y);
+                            doc.text(detalleTexto.substring(0, 35), 110, y); // Detalle impreso en lugar de cantidad
                             doc.text(fecText, 170, y);
                             y += 7;
                         });
