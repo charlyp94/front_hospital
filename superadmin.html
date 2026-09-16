@@ -522,7 +522,7 @@
                 const response = await fetch('https://back-hospital-euk1.onrender.com/api/donaciones');
                 if (!response.ok) throw new Error('Error al conectar con el servidor');
                 
-                const donaciones = await response.json();       
+                const donaciones = await response.json();      
                 donacionesCache = donaciones; 
                 tbody.innerHTML = '';
 
@@ -793,9 +793,9 @@
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(8);
                     doc.setTextColor(80, 80, 80);
-                    doc.text("Donante / Categoría", 16, yPos);
-                    doc.text("Cantidad", 110, yPos);
-                    doc.text("Fecha", 145, yPos);
+                    doc.text("Donante / Categoría", 14, yPos);
+                    doc.text("Detalle de la Donación", 95, yPos);
+                    doc.text("Fecha", 175, yPos);
                     yPos += 4;
 
                     doc.setDrawColor(220, 220, 220);
@@ -803,12 +803,30 @@
                     yPos += 5;
 
                     doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9);
+                    doc.setTextColor(40, 40, 40);
+
                     aprobadas.forEach(d => {
-                        if (yPos > 270) { doc.addPage(); yPos = 20; }
-                        doc.text(`${d.nombre || 'Anónimo'} (${d.categoria || 'S/C'})`, 16, yPos);
-                        doc.text(`${d.cantidad || 0} un.`, 110, yPos);
-                        doc.text(d.fecha ? new Date(d.fecha).toLocaleDateString() : 'N/D', 145, yPos);
-                        yPos += 6;
+                        if (yPos > 265) { doc.addPage(); yPos = 20; }
+                        
+                        const donanteCat = `${d.nombre || 'Anónimo'} (${d.categoria || 'S/C'})`;
+                        const lineasDonante = doc.splitTextToSize(donanteCat, 75);
+
+                        let detalleTexto = d.descripcion || d.elementos || 'Sin detalle';
+                        if (detalleTexto.includes('[RECHAZADO:')) {
+                            detalleTexto = detalleTexto.split('| [RECHAZADO:')[0].trim();
+                        }
+                        const lineasDetalle = doc.splitTextToSize(detalleTexto, 75);
+
+                        const fecText = d.fecha ? new Date(d.fecha).toLocaleDateString() : 'N/D';
+
+                        const maxLineas = Math.max(lineasDonante.length, lineasDetalle.length);
+
+                        doc.text(lineasDonante, 14, yPos);
+                        doc.text(lineasDetalle, 95, yPos);
+                        doc.text(fecText, 175, yPos);
+
+                        yPos += (maxLineas * 5) + 3;
                     });
                     yPos += 4;
                 }
@@ -832,24 +850,35 @@
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(8);
                     doc.setTextColor(80, 80, 80);
-                    doc.text("Donante / Categoría", 16, yPos);
-                    doc.text("Motivo de Rechazo", 110, yPos);
+                    doc.text("Donante / Categoría", 14, yPos);
+                    doc.text("Motivo de Rechazo", 95, yPos);
                     yPos += 4;
 
                     doc.line(14, yPos, 196, yPos);
                     yPos += 5;
 
                     doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9);
+                    doc.setTextColor(40, 40, 40);
+
                     rechazadas.forEach(d => {
-                        if (yPos > 270) { doc.addPage(); yPos = 20; }
-                        doc.text(`${d.nombre || 'Anónimo'} (${d.categoria || 'S/C'})`, 16, yPos);
+                        if (yPos > 265) { doc.addPage(); yPos = 20; }
                         
+                        const donanteCat = `${d.nombre || 'Anónimo'} (${d.categoria || 'S/C'})`;
+                        const lineasDonante = doc.splitTextToSize(donanteCat, 75);
+
                         let motivo = d.descripcion || 'Sin especificar';
                         if (motivo.includes('[RECHAZADO:')) {
                             motivo = motivo.split('[RECHAZADO:')[1].replace(']', '').trim();
                         }
-                        doc.text(motivo.substring(0, 40), 110, yPos);
-                        yPos += 6;
+                        const lineasMotivo = doc.splitTextToSize(motivo, 95);
+
+                        const maxLineas = Math.max(lineasDonante.length, lineasMotivo.length);
+
+                        doc.text(lineasDonante, 14, yPos);
+                        doc.text(lineasMotivo, 95, yPos);
+
+                        yPos += (maxLineas * 5) + 3;
                     });
                 }
 
