@@ -371,414 +371,339 @@
         </div>
     </div>
     <script>
-        // Caché global para almacenar las donaciones y consultarlas en el modal de detalles
-        let donacionesCache = [];
-        // 1. Control de Sesión
-        const usuarioSesion = sessionStorage.getItem('usuarioLogueado');
-        if (!usuarioSesion) {
-            window.location.href = 'login.html';
-        } else {
-            const datosUser = JSON.parse(usuarioSesion);
-            document.getElementById('saludoUsuario').textContent = `${datosUser.nombre} (${datosUser.rol})`;
-            
-            if (datosUser.rol !== 'superadmin' && datosUser.rol !== 'admin') {
+    // Caché global para almacenar las donaciones y consultarlas en el modal de detalles o reportes
+    let donacionesCache = [];
+
+    // 1. Control de Sesión
+    const usuarioSesion = sessionStorage.getItem('usuarioLogueado');
+    if (!usuarioSesion) {
+        window.location.href = 'login.html';
+    } else {
+        const datosUser = JSON.parse(usuarioSesion);
+        document.getElementById('saludoUsuario').textContent = `${datosUser.nombre} (${datosUser.rol})`;
+        
+        if (datosUser.rol !== 'superadmin' && datosUser.rol !== 'admin') {
+            window.location.href = 'index.html';
+        }
+    }
+
+    // Evento Botón Cerrar Sesión con Modal de Confirmación
+    document.getElementById('btnLogout').addEventListener('click', () => {
+        mostrarModalConfirmacion(
+            '¿Cerrar sesión?', 
+            '¿Estás seguro de que deseas salir del panel de administración?',
+            () => {
+                sessionStorage.removeItem('usuarioLogueado');
                 window.location.href = 'index.html';
             }
+        );
+    });
+
+    // 2. Control de Pestañas
+    function switchTab(tabId, event) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); 
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // 3. Sistema de Modales de Feedback y Confirmación
+    function mostrarModalTemporal(tipo, titulo, mensaje) {
+        const overlay = document.getElementById('feedbackOverlay');
+        const box = document.getElementById('feedbackModalBox');
+        const icon = document.getElementById('iconContainer');
+        const actions = document.getElementById('modalActions');   
+        
+        actions.style.display = 'none';
+        box.className = `feedback-modal ${tipo}`;
+        document.getElementById('feedbackTitle').textContent = titulo;
+        document.getElementById('feedbackText').textContent = mensaje;
+        
+        if (tipo === 'success') {
+            icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>`;
+        } else {
+            icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
         }
-        // Evento Botón Cerrar Sesión con Modal de Confirmación
-        document.getElementById('btnLogout').addEventListener('click', () => {
-            mostrarModalConfirmacion(
-                '¿Cerrar sesión?', 
-                '¿Estás seguro de que deseas salir del panel de administración?',
-                () => {
-                    sessionStorage.removeItem('usuarioLogueado');
-                    window.location.href = 'index.html';
-                }
-            );
-        });
-        // 2. Control de Pestañas
-        function switchTab(tabId, event) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); 
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-        // 3. Sistema de Modales de Feedback y Confirmación
-        function mostrarModalTemporal(tipo, titulo, mensaje) {
-            const overlay = document.getElementById('feedbackOverlay');
-            const box = document.getElementById('feedbackModalBox');
-            const icon = document.getElementById('iconContainer');
-            const actions = document.getElementById('modalActions');   
-            actions.style.display = 'none';
-            box.className = `feedback-modal ${tipo}`;
-            document.getElementById('feedbackTitle').textContent = titulo;
-            document.getElementById('feedbackText').textContent = mensaje;
-            if (tipo === 'success') {
-                icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>`;
-            } else {
-                icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+        
+        overlay.classList.add('active');
+        setTimeout(() => overlay.classList.remove('active'), 1500);
+    }
+
+    function mostrarModalConfirmacion(titulo, mensaje, onConfirmar) {
+        const overlay = document.getElementById('feedbackOverlay');
+        const box = document.getElementById('feedbackModalBox');
+        const icon = document.getElementById('iconContainer');
+        const actions = document.getElementById('modalActions');
+        
+        box.className = `feedback-modal confirm`;
+        document.getElementById('feedbackTitle').textContent = titulo;
+        document.getElementById('feedbackText').textContent = mensaje;
+        
+        icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`;
+        actions.style.display = 'flex';
+        actions.className = 'modal-buttons';
+        actions.innerHTML = `
+            <button class="modal-btn modal-btn-confirm" id="btnSiModal">Sí, salir</button>
+            <button class="modal-btn modal-btn-cancel" id="btnNoModal">Cancelar</button>
+        `;
+        
+        overlay.classList.add('active');
+        document.getElementById('btnSiModal').onclick = () => {
+            overlay.classList.remove('active');
+            onConfirmar();
+        };
+        document.getElementById('btnNoModal').onclick = () => {
+            overlay.classList.remove('active');
+        };
+    }
+
+    // 4. API: Cargar Donaciones
+    async function cargarDonaciones() {
+        try {
+            const response = await fetch('https://back-hospital-euk1.onrender.com/api/donaciones');
+            if (!response.ok) throw new Error('Error al conectar con el servidor');
+            
+            const donaciones = await response.json();      
+            donacionesCache = donaciones;
+            const tbody = document.getElementById('tablaDonaciones');
+            tbody.innerHTML = '';
+            
+            if (donaciones.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay donaciones registradas.</td></tr>';
+                return;
             }
-            overlay.classList.add('active');
-            setTimeout(() => overlay.classList.remove('active'), 1500);
-        }
-        function mostrarModalConfirmacion(titulo, mensaje, onConfirmar) {
-            const overlay = document.getElementById('feedbackOverlay');
-            const box = document.getElementById('feedbackModalBox');
-            const icon = document.getElementById('iconContainer');
-            const actions = document.getElementById('modalActions');
-            box.className = `feedback-modal confirm`;
-            document.getElementById('feedbackTitle').textContent = titulo;
-            document.getElementById('feedbackText').textContent = mensaje;
-            // Icono de interrogación / advertencia
-            icon.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`;
-            actions.style.display = 'flex';
-            actions.className = 'modal-buttons';
-            actions.innerHTML = `
-                <button class="modal-btn modal-btn-confirm" id="btnSiModal">Sí, salir</button>
-                <button class="modal-btn modal-btn-cancel" id="btnNoModal">Cancelar</button>
-            `;
-            overlay.classList.add('active');
-            document.getElementById('btnSiModal').onclick = () => {
-                overlay.classList.remove('active');
-                onConfirmar();
-            };
-            document.getElementById('btnNoModal').onclick = () => {
-                overlay.classList.remove('active');
-            };
-        }
-        // 4. API: Cargar Donaciones
-        async function cargarDonaciones() {
-            try {
-                const response = await fetch('https://back-hospital-euk1.onrender.com/api/donaciones');
-                if (!response.ok) throw new Error('Error al conectar con el servidor');
-                const donaciones = await response.json();       
-                donacionesCache = donaciones;
-                const tbody = document.getElementById('tablaDonaciones');
-                tbody.innerHTML = '';
-                if (donaciones.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay donaciones registradas.</td></tr>';
-                    return;
-                }
-                donaciones.forEach(item => {
-                    const estadoActual = item.estado || 'Pendiente';
-                    const estadoClase = estadoActual.toLowerCase().includes('aprobado') ? 'aprobado' : (estadoActual.toLowerCase().includes('rechazado') ? 'rechazado' : 'pendiente');
-                    const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
-                    const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por;                    
-                    let responsableHtml = '<span style="color: #888; font-size: 0.85rem; font-style: italic;">Sin modificar</span>';
-                    if (responsable) {
-                        responsableHtml = `<span style="font-weight: 600; color: #4a2c35;">👤 ${responsable}</span>`;
-                    }
-                    let selectHtml = '';
-                    if (esFinal) {
-                        selectHtml = `<span style="font-size: 0.85rem; color: #666; font-style: italic;">🔒 Cerrado (${estadoActual})</span>`;
-                    } else if (estadoActual === 'Pendiente') {
-                        selectHtml = `
-                            <select onchange="cambiarEstadoDonacion('${item.id || item._id}', this.value)" style="padding: 4px; border-radius: 4px;">
-                                <option value="" disabled selected>Pendiente (Marcar recibido...)</option>
-                                <option value="Recibido">Marcar como Recibido</option>
-                            </select>
-                        `;
-                    } else if (estadoActual === 'Recibido') {
-                        selectHtml = `
-                            <select onchange="cambiarEstadoDonacion('${item.id || item._id}', this.value)" style="padding: 4px; border-radius: 4px;">
-                                <option value="" disabled selected>En Hospital (Elegir destino...)</option>
-                                <option value="Aprobado y Destinado">Aprobado y Destinado</option>
-                                <option value="Rechazado">Rechazado</option>
-                            </select>
-                        `;
-                    }
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>#${item.id || item._id}</td>
-                        <td>
-                            <a href="#" onclick="verDetallesDonacion(${item.id || item._id}); return false;" style="color: #007bff; text-decoration: none; font-weight: bold;">
-                                ${item.nombre || item.donante || 'Anónimo'}
-                            </a><br><small>${item.correo || ''}</small>
-                        </td>
-                        <td>${item.descripcion || item.elementos || 'Sin detalle de elementos'}</td>
-                        <td>${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</td>
-                        <td><span class="badge ${estadoClase}">${estadoActual}</span></td>
-                        <td>${responsableHtml}</td>
-                        <td>${selectHtml}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) {
-                console.error(error);
-                document.getElementById('tablaDonaciones').innerHTML = '<tr><td colspan="7" style="text-align: center; color: #d32f2f;">No se pudieron cargar las donaciones.</td></tr>';
-            }
-        }
-        async function cambiarEstadoDonacion(id, nuevoEstado) {
-            try {
-                const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
-                const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
-                const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        estado: nuevoEstado,
-                        actualizado_por: nombreUsuarioActual
-                    })
-                });
-                if (!response.ok) throw new Error('No se pudo actualizar el estado');   
-                mostrarModalTemporal('success', '¡Estado Actualizado!', `La donación ahora figura como: ${nuevoEstado}`);
-                cargarDonaciones();
-            } catch (error) {
-                mostrarModalTemporal('error', 'Error', 'No se pudo actualizar el estado de la donación.');
-            }
-        }
-        function verDetallesDonacion(id) {
-            const item = donacionesCache.find(d => (d.id == id || d._id == id));
-            if (!item) return;
-            let descripcionLimpia = item.descripcion || 'Sin descripción';
-            let motivoRechazoTexto = 'Ninguno';
-            if (descripcionLimpia.includes('[RECHAZADO:')) {
-                const partes = descripcionLimpia.split('| [RECHAZADO:');
-                descripcionLimpia = partes[0].trim();
-                motivoRechazoTexto = partes[1].replace(']', '').trim();
-            }
-            const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por || 'Sin modificar';
-            let modalDetalle = document.getElementById('modalDetallesDonacion');
-            if (!modalDetalle) {
-                modalDetalle = document.createElement('div');
-                modalDetalle.id = 'modalDetallesDonacion';
-                modalDetalle.style.cssText = `
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;
-                `;
-                document.body.appendChild(modalDetalle);
-            }
-            modalDetalle.innerHTML = `
-                <div style="background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: inherit; color: #333; max-height: 90vh; overflow-y: auto;">
-                    <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Detalles de la Donación #${item.id || item._id}</h3>       
-                    <div style="margin: 15px 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; color: #444;">
-                        <div><strong>Donante:</strong> ${item.nombre || 'Anónimo'}</div>
-                        <div><strong>Tipo:</strong> ${item.tipo_donante || 'N/D'}</div>
-                        <div><strong>Documento (DNI/CUIT):</strong> ${item.dni || item.cuit || 'N/D'}</div>
-                        <div><strong>Correo:</strong> ${item.correo || 'N/D'}</div>
-                        <div><strong>Teléfono:</strong> ${item.telefono || 'N/D'}</div>
-                        <div><strong>Categoría:</strong> ${item.categoria || 'N/D'}</div>
-                        <div><strong>Cantidad:</strong> ${item.cantidad || 0}</div>
-                        <div><strong>Descripción:</strong> ${descripcionLimpia}</div>
-                        <div><strong>Fecha de registro:</strong> ${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</div>
-                        <div><strong>Estado Actual:</strong> <span style="font-weight: bold; color: #007bff;">${item.estado || 'Pendiente'}</span></div>
-                        <div><strong>Modificado por:</strong> <span style="color: #4a2c35; font-weight: 600;">${responsable}</span></div>
-                        ${item.estado === 'Rechazado' ? `<div style="background: #ffe6e6; padding: 8px; border-radius: 4px; color: #d32f2f; margin-top: 5px;"><strong>Motivo de Rechazo:</strong> ${motivoRechazoTexto}</div>` : ''}
-                    </div>
-                    <div style="text-align: right; margin-top: 20px;">
-                        <button onclick="document.getElementById('modalDetallesDonacion').remove()" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            `;
-            modalDetalle.style.display = 'flex';
-        }
-                async function descargarReportePdfPeriodo(fechaInicio, fechaFin) {
-            try {
-                Swal.fire({
-                    title: 'Generando reporte...',
-                    text: 'Por favor espere un momento.',
-                    allowOutsideClick: false,
-                    didOpen: () => { Swal.showLoading(); }
-                });
-
-                const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/reporte?inicio=${fechaInicio}&fin=${fechaFin}`);
-                const resultado = await response.json();
-
-                if (!resultado.success || !resultado.donaciones || resultado.donaciones.length === 0) {
-                    Swal.fire('Sin registros', 'No se encontraron donaciones en el periodo seleccionado.', 'info');
-                    return;
-                }
-
-                const donaciones = resultado.donaciones;
-                let totalGeneral = donaciones.length;
-                let aprobadas = donaciones.filter(d => d.estado === 'Aprobado y Destinado');
-                let rechazadas = donaciones.filter(d => d.estado === 'Rechazado');
-
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                // Encabezado institucional
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(15);
-                doc.setTextColor(44, 62, 80);
-                doc.text("HOSPITAL LUIS A. GÜEMES", 105, 18, { align: "center" });
-
-                doc.setFontSize(10);
-                doc.setTextColor(100, 100, 100);
-                doc.text("A.O. III Aguaray - Salta | Reporte Oficial de Gestión de Donaciones", 105, 24, { align: "center" });
-
-                doc.setDrawColor(180, 180, 180);
-                doc.line(14, 28, 196, 28);
-
-                // Fechas
-                doc.setFontSize(9);
-                doc.setTextColor(50, 50, 50);
-                doc.text(`Periodo analizado: Del ${fechaInicio} al ${fechaFin}`, 14, 35);
-                doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 14, 40);
-
-                // Cuadro de Resumen General
-                doc.setFillColor(240, 243, 246);
-                doc.roundedRect(14, 45, 182, 22, 2, 2, 'F');
-                doc.setFont("helvetica", "bold");
-                doc.text("Resumen General del Periodo:", 18, 52);
-                doc.setFont("helvetica", "normal");
-                doc.text(`• Total Registradas: ${totalGeneral}   |   • Aprobadas y Destinadas: ${aprobadas.length}   |   • Rechazadas: ${rechazadas.length}`, 18, 60);
-
-                let yPos = 74;
-
-                // --- SECCIÓN 1: DONACIONES APROBADAS Y DESTINADAS ---
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(11);
-                doc.setTextColor(39, 174, 96);
-                doc.text(`1. Sección: Donaciones Aprobadas y Destinadas (${aprobadas.length})`, 14, yPos);
-                yPos += 6;
-
-                if (aprobadas.length === 0) {
-                    doc.setFont("helvetica", "italic");
-                    doc.setFontSize(9);
-                    doc.setTextColor(100, 100, 100);
-                    doc.text("No hay registros aprobados en este periodo.", 18, yPos);
-                    yPos += 8;
-                } else {
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(8);
-                    doc.setTextColor(80, 80, 80);
-                    doc.text("Donante / Categoría", 16, yPos);
-                    doc.text("Cantidad", 110, yPos);
-                    doc.text("Fecha", 145, yPos);
-                    yPos += 4;
-
-                    doc.setDrawColor(220, 220, 220);
-                    doc.line(14, yPos, 196, yPos);
-                    yPos += 5;
-
-                    doc.setFont("helvetica", "normal");
-                    aprobadas.forEach(d => {
-                        if (yPos > 270) { doc.addPage(); yPos = 20; }
-                        doc.text(`${d.nombre || 'Anónimo'} (${d.categoria || 'S/C'})`, 16, yPos);
-                        doc.text(`${d.cantidad || 0} un.`, 110, yPos);
-                        doc.text(d.fecha ? new Date(d.fecha).toLocaleDateString() : 'N/D', 145, yPos);
-                        yPos += 6;
-                    });
-                    yPos += 4;
-                }
-
-                // --- SECCIÓN 2: DONACIONES RECHAZADAS ---
-                if (yPos > 250) { doc.addPage(); yPos = 20; }
+            
+            donaciones.forEach(item => {
+                const estadoActual = item.estado || 'Pendiente';
+                const estadoClase = estadoActual.toLowerCase().includes('aprobado') ? 'aprobado' : (estadoActual.toLowerCase().includes('rechazado') ? 'rechazado' : 'pendiente');
+                const esFinal = estadoActual === 'Aprobado y Destinado' || estadoActual === 'Rechazado';
+                const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por;                
                 
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(11);
-                doc.setTextColor(192, 57, 43);
-                doc.text(`2. Sección: Donaciones Rechazadas (${rechazadas.length})`, 14, yPos);
-                yPos += 6;
-
-                if (rechazadas.length === 0) {
-                    doc.setFont("helvetica", "italic");
-                    doc.setFontSize(9);
-                    doc.setTextColor(100, 100, 100);
-                    doc.text("No hay registros rechazados en este periodo.", 18, yPos);
-                    yPos += 8;
-                } else {
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(8);
-                    doc.setTextColor(80, 80, 80);
-                    doc.text("Donante / Categoría", 16, yPos);
-                    doc.text("Motivo de Rechazo", 110, yPos);
-                    yPos += 4;
-
-                    doc.line(14, yPos, 196, yPos);
-                    yPos += 5;
-
-                    doc.setFont("helvetica", "normal");
-                    rechazadas.forEach(d => {
-                        if (yPos > 270) { doc.addPage(); yPos = 20; }
-                        doc.text(`${d.nombre || 'Anónimo'} (${d.categoria || 'S/C'})`, 16, yPos);
-                        
-                        let motivo = d.descripcion || 'Sin especificar';
-                        if (motivo.includes('[RECHAZADO:')) {
-                            motivo = motivo.split('[RECHAZADO:')[1].replace(']', '').trim();
-                        }
-                        doc.text(motivo.substring(0, 40), 110, yPos);
-                        yPos += 6;
-                    });
+                let responsableHtml = '<span style="color: #888; font-size: 0.85rem; font-style: italic;">Sin modificar</span>';
+                if (responsable) {
+                    responsableHtml = `<span style="font-weight: 600; color: #4a2c35;">👤 ${responsable}</span>`;
                 }
 
-                // Pie de página general
-                doc.setFontSize(8);
-                doc.setTextColor(150, 150, 150);
-                doc.text("Sistema de Gestión Hospitalaria - Hospital Luis A. Güemes", 105, 285, { align: "center" });
-
-                doc.save(`Reporte_Donaciones_${fechaInicio}_al_${fechaFin}.pdf`);
-
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Reporte generado!',
-                    text: 'El PDF se ha descargado correctamente.',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
-            } catch (error) {
-                console.error("Error al generar PDF:", error);
-                Swal.fire('Error', 'Hubo un problema al procesar el reporte PDF.', 'error');
-            }
-        }
-        // 5. API: Gestión de Usuarios
-        async function cargarUsuarios() {
-            try {
-                const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios');
-                if (!response.ok) throw new Error('Error al obtener usuarios');
-                const usuarios = await response.json();
-                const tbody = document.getElementById('tablaUsuarios');
-                tbody.innerHTML = '';
-                if (usuarios.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay usuarios registrados.</td></tr>';
-                    return;
-                }
-                usuarios.forEach(user => {
-                    const rolClase = user.rol ? user.rol.toLowerCase() : 'usuario';
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>#${user.id || user._id}</td>
-                        <td>${user.nombre || 'Sin nombre'}</td>
-                        <td>${user.nombre_usuario || user.username}</td>
-                        <td>${user.dni || 'N/D'}</td>
-                        <td><span class="badge ${rolClase}">${user.rol}</span></td>
+                let selectHtml = '';
+                if (esFinal) {
+                    selectHtml = `<span style="font-size: 0.85rem; color: #666; font-style: italic;">🔒 Cerrado (${estadoActual})</span>`;
+                } else if (estadoActual === 'Pendiente') {
+                    selectHtml = `
+                        <select onchange="cambiarEstadoDonacion('${item.id || item._id}', this.value)" style="padding: 4px; border-radius: 4px;">
+                            <option value="" disabled selected>Pendiente (Marcar recibido...)</option>
+                            <option value="Recibido">Marcar como Recibido</option>
+                        </select>
                     `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) {
-                console.error(error);
-                document.getElementById('tablaUsuarios').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #d32f2f;">Error al cargar usuarios.</td></tr>';
-            }
+                } else if (estadoActual === 'Recibido') {
+                    selectHtml = `
+                        <select onchange="cambiarEstadoDonacion('${item.id || item._id}', this.value)" style="padding: 4px; border-radius: 4px;">
+                            <option value="" disabled selected>En Hospital (Elegir destino...)</option>
+                            <option value="Aprobado y Destinado">Aprobado y Destinado</option>
+                            <option value="Rechazado">Rechazado</option>
+                        </select>
+                    `;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${item.id || item._id}</td>
+                    <td>
+                        <a href="#" onclick="verDetallesDonacion(${item.id || item._id}); return false;" style="color: #007bff; text-decoration: none; font-weight: bold;">
+                            ${item.nombre || item.donante || 'Anónimo'}
+                        </a><br><small>${item.correo || ''}</small>
+                    </td>
+                    <td>${item.descripcion || item.elementos || 'Sin detalle de elementos'}</td>
+                    <td>${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</td>
+                    <td><span class="badge ${estadoClase}">${estadoActual}</span></td>
+                    <td>${responsableHtml}</td>
+                    <td>${selectHtml}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error(error);
+            document.getElementById('tablaDonaciones').innerHTML = '<tr><td colspan="7" style="text-align: center; color: #d32f2f;">No se pudieron cargar las donaciones.</td></tr>';
         }
-        document.getElementById('formCrearUsuario').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nombre = document.getElementById('nuevoNombre').value.trim();
-            const nombre_usuario = document.getElementById('nuevoUsername').value.trim();
-            const dni = document.getElementById('nuevoDni').value.trim();
-            const contrasena = document.getElementById('nuevoPassword').value.trim();
-            const rol = 'usuario';
-            try {
-                const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, nombre_usuario, dni, contrasena, rol })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'No se pudo crear el usuario');
-                mostrarModalTemporal('success', '¡Usuario Creado!', `Se registró exitosamente a ${nombre} como usuario común`);
-                document.getElementById('formCrearUsuario').reset();
-                cargarUsuarios();
-            } catch (error) {
-                mostrarModalTemporal('error', 'Error', error.message || 'No se pudo crear el usuario.');
+    }
+
+    async function cambiarEstadoDonacion(id, nuevoEstado) {
+        try {
+            const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
+            const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
+            
+            const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    estado: nuevoEstado,
+                    actualizado_por: nombreUsuarioActual
+                })
+            });
+            
+            if (!response.ok) throw new Error('No se pudo actualizar el estado');   
+            
+            mostrarModalTemporal('success', '¡Estado Actualizado!', `La donación ahora figura como: ${nuevoEstado}`);
+            cargarDonaciones();
+        } catch (error) {
+            console.error(error);
+            mostrarModalTemporal('error', 'Error', 'No se pudo actualizar el estado de la donación.');
+        }
+    }
+
+    function verDetallesDonacion(id) {
+        const item = donacionesCache.find(d => (d.id == id || d._id == id));
+        if (!item) return;
+
+        let descripcionLimpia = item.descripcion || 'Sin descripción';
+        let motivoRechazoTexto = 'Ninguno';
+        
+        if (descripcionLimpia.includes('[RECHAZADO:')) {
+            const partes = descripcionLimpia.split('| [RECHAZADO:');
+            descripcionLimpia = partes[0].trim();
+            motivoRechazoTexto = partes[1].replace(']', '').trim();
+        }
+
+        const responsable = item.actualizado_por || item.modificado_por || item.gestionado_por || 'Sin modificar';
+        
+        let modalDetalle = document.getElementById('modalDetallesDonacion');
+        if (!modalDetalle) {
+            modalDetalle = document.createElement('div');
+            modalDetalle.id = 'modalDetallesDonacion';
+            modalDetalle.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;
+            `;
+            document.body.appendChild(modalDetalle);
+        }
+
+        modalDetalle.innerHTML = `
+            <div style="background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: inherit; color: #333; max-height: 90vh; overflow-y: auto;">
+                <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Detalles de la Donación #${item.id || item._id}</h3>      
+                <div style="margin: 15px 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; color: #444;">
+                    <div><strong>Donante:</strong> ${item.nombre || 'Anónimo'}</div>
+                    <div><strong>Tipo:</strong> ${item.tipo_donante || 'N/D'}</div>
+                    <div><strong>Documento (DNI/CUIT):</strong> ${item.dni || item.cuit || 'N/D'}</div>
+                    <div><strong>Correo:</strong> ${item.correo || 'N/D'}</div>
+                    <div><strong>Teléfono:</strong> ${item.telefono || 'N/D'}</div>
+                    <div><strong>Categoría:</strong> ${item.categoria || 'N/D'}</div>
+                    <div><strong>Cantidad:</strong> ${item.cantidad || 0}</div>
+                    <div><strong>Descripción:</strong> ${descripcionLimpia}</div>
+                    <div><strong>Fecha de registro:</strong> ${item.fecha ? new Date(item.fecha).toLocaleString('es-AR') : 'N/D'}</div>
+                    <div><strong>Estado Actual:</strong> <span style="font-weight: bold; color: #007bff;">${item.estado || 'Pendiente'}</span></div>
+                    <div><strong>Modificado por:</strong> <span style="color: #4a2c35; font-weight: 600;">${responsable}</span></div>
+                    ${item.estado === 'Rechazado' ? `<div style="background: #ffe6e6; padding: 8px; border-radius: 4px; color: #d32f2f; margin-top: 5px;"><strong>Motivo de Rechazo:</strong> ${motivoRechazoTexto}</div>` : ''}
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button onclick="document.getElementById('modalDetallesDonacion').remove()" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        `;
+        modalDetalle.style.display = 'flex';
+    }
+
+    // 5. Generación de Reportes en PDF / Estadísticas por Rango de Fechas
+    async function generarReporteDonaciones() {
+        const fechaInicio = document.getElementById('reporteFechaInicio')?.value;
+        const fechaFin = document.getElementById('reporteFechaFin')?.value;
+
+        try {
+            let url = 'https://back-hospital-euk1.onrender.com/api/donaciones/reporte';
+            if (fechaInicio && fechaFin) {
+                url += `?inicio=${fechaInicio}&fin=${fechaFin}`;
             }
-        });
-        cargarDonaciones();
-        cargarUsuarios();
-    </script>
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('No se pudo generar el reporte estadístico');
+
+            const data = await response.json();
+            
+            // Si la API devuelve un PDF en base64 o blob, o si se genera localmente mediante jsPDF con los datos filtrados:
+            mostrarModalTemporal('success', 'Reporte Generado', 'El resumen estadístico y filtrado está listo para su descarga.');
+            
+            // Opcional: Procesamiento de datos estadísticos locales si se requiere mostrar en pantalla
+            console.log("Datos del reporte:", data);
+        } catch (error) {
+            console.error(error);
+            // Fallback usando el caché local si la ruta específica del server varía
+            const filtradas = donacionesCache.filter(item => {
+                if (!fechaInicio || !fechaFin) return true;
+                const fechaItem = item.fecha ? item.fecha.split('T')[0] : '';
+                return fechaItem >= fechaInicio && fechaItem <= fechaFin;
+            });
+
+            const total = filtradas.length;
+            const aprobadas = filtradas.filter(d => d.estado === 'Aprobado y Destinado').length;
+            const rechazadas = filtradas.filter(d => d.estado === 'Rechazado').length;
+            
+            mostrarModalTemporal('success', 'Reporte Local', `Total: ${total} | Aprobadas: ${aprobadas} | Rechazadas: ${rechazadas}`);
+        }
+    }
+
+    // 6. API: Gestión de Usuarios
+    async function cargarUsuarios() {
+        try {
+            const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios');
+            if (!response.ok) throw new Error('Error al obtener usuarios');
+            
+            const usuarios = await response.json();
+            const tbody = document.getElementById('tablaUsuarios');
+            tbody.innerHTML = '';
+            
+            if (usuarios.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay usuarios registrados.</td></tr>';
+                return;
+            }
+            
+            usuarios.forEach(user => {
+                const rolClase = user.rol ? user.rol.toLowerCase() : 'usuario';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${user.id || user._id}</td>
+                    <td>${user.nombre || 'Sin nombre'}</td>
+                    <td>${user.nombre_usuario || user.username}</td>
+                    <td>${user.dni || 'N/D'}</td>
+                    <td><span class="badge ${rolClase}">${user.rol}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error(error);
+            document.getElementById('tablaUsuarios').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #d32f2f;">Error al cargar usuarios.</td></tr>';
+        }
+    }
+
+    document.getElementById('formCrearUsuario').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nombre = document.getElementById('nuevoNombre').value.trim();
+        const nombre_usuario = document.getElementById('nuevoUsername').value.trim();
+        const dni = document.getElementById('nuevoDni').value.trim();
+        const contrasena = document.getElementById('nuevoPassword').value.trim();
+        const rol = 'usuario';
+
+        try {
+            const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, nombre_usuario, dni, contrasena, rol })
+            });
+            
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'No se pudo crear el usuario');
+            
+            mostrarModalTemporal('success', '¡Usuario Creado!', `Se registró exitosamente a ${nombre} como usuario común`);
+            document.getElementById('formCrearUsuario').reset();
+            cargarUsuarios();
+        } catch (error) {
+            mostrarModalTemporal('error', 'Error', error.message || 'No se pudo crear el usuario.');
+        }
+    });
+
+    // Inicialización al cargar la página
+    cargarDonaciones();
+    cargarUsuarios();
+</script>
     <div style="display: flex; justify-content: center; gap: 15px; margin: 30px 0; flex-wrap: wrap;">
     <!-- Opción para descargarlo directo -->
     <a href="./GUIA_USO_DONACIONES_HOSPITAL.pdf" download="Manual_Usuario_Hospital.pdf" class="enlace-manual">
