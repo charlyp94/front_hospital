@@ -622,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalDetalle.style.display = 'flex';
     };
 
-    // 5. Evento para el botón de Generar Reporte por Periodo (Estilo exacto SuperAdmin con SweetAlert2 y jsPDF profesional)
+    // 5. Evento para el botón de Generar Reporte por Periodo (Con filtros unificados y exactos)
     const btnReporte = document.getElementById('btnAbrirReporte');
     if (btnReporte) {
         btnReporte.addEventListener('click', async (e) => {
@@ -668,7 +668,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (formValues) {
                 const { inicio, fin } = formValues;
 
-                // Modal de carga idéntico al superadmin
                 Swal.fire({
                     title: 'Generando reporte...',
                     text: 'Por favor espere un momento.',
@@ -678,7 +677,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                // Simular pequeña pausa de carga visual y procesamiento
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 const donacionesFiltradas = donacionesCache.filter(item => {
@@ -696,7 +694,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
 
-                    // --- ENCABEZADO PROFESIONAL ESTILO HOSPITAL ---
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(16);
                     doc.setTextColor(20, 50, 90);
@@ -711,7 +708,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     doc.setLineWidth(0.5);
                     doc.line(14, 25, 196, 25);
 
-                    // --- DATOS DEL PERIODO ---
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(10);
                     doc.setTextColor(40, 40, 40);
@@ -720,10 +716,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     const fechaEmisionStr = new Date().toLocaleDateString('es-AR');
                     doc.text(`Fecha de emisión: ${fechaEmisionStr}`, 14, 38);
 
-                    // --- CAJA DE RESUMEN GENERAL ---
+                    // --- FILTROS UNIFICADOS Y EXACTOS ---
+                    const listaAprobadas = donacionesFiltradas.filter(d => d.estado === 'Aprobado y Destinado');
+                    const listaRechazadas = donacionesFiltradas.filter(d => d.estado === 'Rechazado');
+
                     const totalReg = donacionesFiltradas.length;
-                    const aprobadasDest = donacionesFiltradas.filter(d => d.estado === 'Aprobado y Destinado').length;
-                    const rechazadasCount = donacionesFiltradas.filter(d => d.estado === 'Rechazado').length;
+                    const aprobadasDest = listaAprobadas.length;
+                    const rechazadasCount = listaRechazadas.length;
 
                     doc.setFillColor(240, 243, 246);
                     doc.roundedRect(14, 43, 182, 16, 2, 2, 'F');
@@ -738,16 +737,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     let y = 68;
 
-                    // --- SECCIÓN 1: APROBADAS Y DESTINADAS ---
-                    const listaAprobadas = donacionesFiltradas.filter(d => d.estado === 'Aprobado y Destinado' || d.estado === 'Recibido' || d.estado === 'Aprobado');
-                    
+                    // Sección 1: Aprobadas y Destinadas
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(12);
-                    doc.setTextColor(34, 139, 34); // Verde institucional
+                    doc.setTextColor(34, 139, 34);
                     doc.text(`1. Sección: Donaciones Aprobadas y Destinadas (${listaAprobadas.length})`, 14, y);
                     y += 6;
 
-                    // Cabecera tabla aprobadas
                     doc.setFontSize(9);
                     doc.setTextColor(80, 80, 80);
                     doc.text("Donante / Categoría", 14, y);
@@ -781,18 +777,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     y += 6;
 
-                    // --- SECCIÓN 2: RECHAZADAS ---
-                    const listaRechazadas = donacionesFiltradas.filter(d => d.estado === 'Rechazado');
-
+                    // Sección 2: Rechazadas
                     if (y > 250) { doc.addPage(); y = 20; }
 
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(12);
-                    doc.setTextColor(200, 40, 40); // Rojo institucional
+                    doc.setTextColor(200, 40, 40);
                     doc.text(`2. Sección: Donaciones Rechazadas (${listaRechazadas.length})`, 14, y);
                     y += 6;
 
-                    // Cabecera tabla rechazadas
                     doc.setFontSize(9);
                     doc.setTextColor(80, 80, 80);
                     doc.text("Donante / Categoría", 14, y);
@@ -826,7 +819,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     doc.save(`Reporte_Donaciones_${inicio}_al_${fin}.pdf`);
 
-                    // Modal de éxito idéntico al superadmin
                     Swal.fire({
                         title: '¡Reporte generado!',
                         text: 'El PDF se ha descargado correctamente.',
