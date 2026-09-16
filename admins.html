@@ -622,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalDetalle.style.display = 'flex';
     };
 
-    // 5. Evento para el botón de Generar Reporte por Periodo (Mostrando el detalle de la donación)
+    // 5. Evento para el botón de Generar Reporte por Periodo
     const btnReporte = document.getElementById('btnAbrirReporte');
     if (btnReporte) {
         btnReporte.addEventListener('click', async (e) => {
@@ -746,7 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     doc.setFontSize(9);
                     doc.setTextColor(80, 80, 80);
                     doc.text("Donante / Categoría", 14, y);
-                    doc.text("Detalle de la Donación", 110, y); // Cabecera modificada
+                    doc.text("Detalle de la Donación", 110, y);
                     doc.text("Fecha", 170, y);
                     y += 2;
                     doc.setLineWidth(0.3);
@@ -762,21 +762,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         y += 8;
                     } else {
                         listaAprobadas.forEach(item => {
-                            if (y > 270) { doc.addPage(); y = 20; }
+                            if (y > 265) { doc.addPage(); y = 20; }
                             const donanteCat = `${item.nombre || 'Anónimo'} (${item.categoria || 'General'})`;
                             
-                            // Limpieza del detalle (eliminando marcas de rechazo si existieran por seguridad)
+                            // Usamos splitTextToSize para permitir que salte de línea si supera los 90 mm de ancho
+                            const lineasDonante = doc.splitTextToSize(donanteCat, 90);
+                            
                             let detalleTexto = item.descripcion || item.elementos || 'Sin detalle';
                             if (detalleTexto.includes('[RECHAZADO:')) {
                                 detalleTexto = detalleTexto.split('| [RECHAZADO:')[0].trim();
                             }
+                            const lineasDetalle = doc.splitTextToSize(detalleTexto, 55);
 
                             const fecText = item.fecha ? new Date(item.fecha).toLocaleDateString('es-AR') : 'N/D';
 
-                            doc.text(donanteCat.substring(0, 50), 14, y);
-                            doc.text(detalleTexto.substring(0, 35), 110, y); // Detalle impreso en lugar de cantidad
+                            // Calculamos cuántas líneas ocupa la fila más alta para ajustar el espacio vertical
+                            const maxLineas = Math.max(lineasDonante.length, lineasDetalle.length);
+
+                            doc.text(lineasDonante, 14, y);
+                            doc.text(lineasDetalle, 110, y);
                             doc.text(fecText, 170, y);
-                            y += 7;
+
+                            // Espaciado dinámico según las líneas impresas (aprox 5mm por línea + margen extra)
+                            y += (maxLineas * 5) + 3;
                         });
                     }
 
@@ -807,18 +815,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         doc.text("No hay donaciones rechazadas en este periodo.", 14, y);
                     } else {
                         listaRechazadas.forEach(item => {
-                            if (y > 270) { doc.addPage(); y = 20; }
+                            if (y > 265) { doc.addPage(); y = 20; }
                             const donanteCat = `${item.nombre || 'Anónimo'} (${item.categoria || 'General'})`;
+                            const lineasDonante = doc.splitTextToSize(donanteCat, 90);
                             
                             let motivo = 'Sin especificar';
                             if (item.descripcion && item.descripcion.includes('[RECHAZADO:')) {
                                 const partes = item.descripcion.split('| [RECHAZADO:');
                                 motivo = partes[1].replace(']', '').trim();
                             }
+                            const lineasMotivo = doc.splitTextToSize(motivo, 80);
 
-                            doc.text(donanteCat.substring(0, 50), 14, y);
-                            doc.text(motivo.substring(0, 45), 110, y);
-                            y += 7;
+                            const maxLineas = Math.max(lineasDonante.length, lineasMotivo.length);
+
+                            doc.text(lineasDonante, 14, y);
+                            doc.text(lineasMotivo, 110, y);
+
+                            y += (maxLineas * 5) + 3;
                         });
                     }
 
