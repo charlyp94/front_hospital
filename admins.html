@@ -370,7 +370,7 @@
             <div id="modalActions" style="display: none;"></div>
         </div>
     </div>
-    <script>
+<script>
     // Caché global para almacenar las donaciones y consultarlas en el modal de detalles o reportes
     let donacionesCache = [];
 
@@ -603,42 +603,110 @@
         modalDetalle.style.display = 'flex';
     }
 
-    // 5. Generación de Reportes en PDF / Estadísticas por Rango de Fechas
-    async function generarReporteDonaciones() {
-        const fechaInicio = document.getElementById('reporteFechaInicio')?.value;
-        const fechaFin = document.getElementById('reporteFechaFin')?.value;
-
-        try {
-            let url = 'https://back-hospital-euk1.onrender.com/api/donaciones/reporte';
-            if (fechaInicio && fechaFin) {
-                url += `?inicio=${fechaInicio}&fin=${fechaFin}`;
-            }
-
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('No se pudo generar el reporte estadístico');
-
-            const data = await response.json();
-            
-            // Si la API devuelve un PDF en base64 o blob, o si se genera localmente mediante jsPDF con los datos filtrados:
-            mostrarModalTemporal('success', 'Reporte Generado', 'El resumen estadístico y filtrado está listo para su descarga.');
-            
-            // Opcional: Procesamiento de datos estadísticos locales si se requiere mostrar en pantalla
-            console.log("Datos del reporte:", data);
-        } catch (error) {
-            console.error(error);
-            // Fallback usando el caché local si la ruta específica del server varía
-            const filtradas = donacionesCache.filter(item => {
-                if (!fechaInicio || !fechaFin) return true;
-                const fechaItem = item.fecha ? item.fecha.split('T')[0] : '';
-                return fechaItem >= fechaInicio && fechaItem <= fechaFin;
+    // 5. Evento para el botón de Generar Reporte por Periodo (SweetAlert2 + jsPDF)
+    const btnReporte = document.getElementById('btnAbrirReporte');
+    if (btnReporte) {
+        btnReporte.addEventListener('click', async () => {
+            const { value: formValues } = await Swal.fire({
+                title: 'Generar Reporte por Periodo',
+                html: `
+                    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                        <label for="swal-input-inicio" style="font-weight: bold; font-size: 0.9rem;">Fecha de Inicio:</label>
+                        <input id="swal-input-inicio" type="date" class="swal2-input" style="margin: 0; width: 100%;">
+                        <label for="swal-input-fin" style="font-weight: bold; font-size: 0.9rem; margin-top: 10px;">Fecha de Fin:</label>
+                        <input id="swal-input-fin" type="date" class="swal2-input" style="margin: 0; width: 100%;">
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Generar PDF',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#007bff',
+                preConfirm: () => {
+                    const inicio = document.getElementById('swal-input-inicio').value;
+                    const fin = document.getElementById('swal-input-fin').value;
+                    if (!inicio || !fin) {
+                        Swal.showValidationMessage('Por favor, selecciona ambas fechas');
+                    }
+                    return { inicio, fin };
+                }
             });
 
-            const total = filtradas.length;
-            const aprobadas = filtradas.filter(d => d.estado === 'Aprobado y Destinado').length;
-            const rechazadas = filtradas.filter(d => d.estado === 'Rechazado').length;
-            
-            mostrarModalTemporal('success', 'Reporte Local', `Total: ${total} | Aprobadas: ${aprobadas} | Rechazadas: ${rechazadas}`);
-        }
+            if (formValues) {
+                const { inicio, fin } = formValues;
+                
+                const donacionesFiltradas = donacionesCache.filter(item => {
+                    if (!item.fecha) return false;
+                    const fechaItem = item.fecha.split('T')[0];
+                    return fechaItem >= inicio && fechaItem <= fin;
+                });
+
+                if (donacionesFiltradas.length === 0) {
+                    Swal.fire('Sin registros', 'No se encontraron donaciones en el periodo seleccionado.', 'info');
+                    return;
+                }
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+
+                    doc.setFontSize(18);
+                    doc.setTextColor(40, 40, 40);
+                    doc.text("Reporte de Donaciones - Hospital", 14, 20);
+                    
+                    doc.setFontSize(11);
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`Periodo: Desde ${inicio} hasta ${fin}`, 14, 28);
+                    doc.text(`Fecha de emisión: ${new Date().toLocaleDateString('es-AR')}`, 14, 34);
+
+                    const totalDonaciones = donacionesFiltradas.length;
+                    const aprobadas = donacionesFiltradas.filter(d => d.estado === 'Aprobado y Destinado').length;
+                    const rechazadas = donacionesFiltradas.filter(d => d.estado === 'Rechazado').length;
+
+                    doc.setFontSize(10);
+                    doc.text(`Total Registros: ${totalDonaciones} | Aprobadas: ${aprobadas} | Rechazadas: ${rechazadas}`, 14, 42);
+
+                    let y = 52;
+                    doc.setFontSize(10);
+                    doc.setFont(undefined, 'bold');
+                    doc.text("ID", 14, y);
+                    doc.text("Donante", 25, y);
+                    doc.text("Categoría", 90, y);
+                    doc.text("Estado", 140, y);
+                    doc.text("Fecha", 170, y);
+                    
+                    doc.setFont(undefined, 'normal');
+                    y += 6;
+                    doc.line(14, y - 2, 196, y - 2);
+
+                    donacionesFiltradas.forEach(item => {
+                        if (y > 270) {
+                            doc.addPage();
+                            y = 20;
+                        }
+                        const idText = `#${item.id || item._id}`;
+                        const nombreText = (item.nombre || 'Anónimo').substring(0, 25);
+                        const catText = (item.categoria || 'N/D').substring(0, 15);
+                        const estadoText = (item.estado || 'Pendiente').substring(0, 15);
+                        const fechaText = item.fecha ? new Date(item.fecha).toLocaleDateString('es-AR') : 'N/D';
+
+                        doc.text(idText, 14, y);
+                        doc.text(nombreText, 25, y);
+                        doc.text(catText, 90, y);
+                        doc.text(estadoText, 140, y);
+                        doc.text(fechaText, 170, y);
+                        y += 8;
+                    });
+
+                    doc.save(`Reporte_Donaciones_${inicio}_al_${fin}.pdf`);
+                    Swal.fire('¡Éxito!', 'El reporte en PDF se ha descargado correctamente.', 'success');
+
+                } catch (err) {
+                    console.error("Error al generar PDF:", err);
+                    Swal.fire('Error', 'Hubo un problema al crear el archivo PDF.', 'error');
+                }
+            }
+        });
     }
 
     // 6. API: Gestión de Usuarios
