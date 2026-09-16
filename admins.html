@@ -622,11 +622,11 @@ document.addEventListener('DOMContentLoaded', () => {
         modalDetalle.style.display = 'flex';
     };
 
-    // 5. Evento para el botón de Generar Reporte por Periodo (SweetAlert2 + jsPDF)
+    // 5. Evento para el botón de Generar Reporte por Periodo (Estilo exacto SuperAdmin con SweetAlert2 y jsPDF profesional)
     const btnReporte = document.getElementById('btnAbrirReporte');
     if (btnReporte) {
         btnReporte.addEventListener('click', async (e) => {
-            e.preventDefault(); // Evita comportamientos extraños del enlace
+            e.preventDefault();
             
             if (typeof Swal === 'undefined') {
                 alert('La librería SweetAlert2 no está disponible.');
@@ -634,25 +634,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const { value: formValues } = await Swal.fire({
-                title: 'Generar Reporte por Periodo',
+                title: 'Generar Reporte de Donaciones',
                 html: `
-                    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
-                        <label for="swal-input-inicio" style="font-weight: bold; font-size: 0.9rem;">Fecha de Inicio:</label>
-                        <input id="swal-input-inicio" type="date" class="swal2-input" style="margin: 0; width: 100%;">
-                        <label for="swal-input-fin" style="font-weight: bold; font-size: 0.9rem; margin-top: 10px;">Fecha de Fin:</label>
-                        <input id="swal-input-fin" type="date" class="swal2-input" style="margin: 0; width: 100%;">
+                    <div style="display: flex; flex-direction: column; gap: 12px; text-align: left; padding: 10px 20px;">
+                        <label for="swal-input-inicio" style="font-weight: bold; font-size: 0.95rem; color: #333;">Fecha de Inicio:</label>
+                        <input id="swal-input-inicio" type="date" class="swal2-input" style="margin: 0; width: 100%; border-radius: 6px;">
+                        
+                        <label for="swal-input-fin" style="font-weight: bold; font-size: 0.95rem; color: #333; margin-top: 5px;">Fecha de Fin:</label>
+                        <input id="swal-input-fin" type="date" class="swal2-input" style="margin: 0; width: 100%; border-radius: 6px;">
                     </div>
                 `,
                 focusConfirm: false,
                 showCancelButton: true,
-                confirmButtonText: 'Generar PDF',
+                confirmButtonText: 'Generar y Descargar PDF',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#007bff',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                buttonsStyling: true,
+                customClass: {
+                    confirmButton: 'swal2-confirm-custom',
+                    cancelButton: 'swal2-cancel-custom'
+                },
                 preConfirm: () => {
                     const inicio = document.getElementById('swal-input-inicio').value;
                     const fin = document.getElementById('swal-input-fin').value;
                     if (!inicio || !fin) {
-                        Swal.showValidationMessage('Por favor, selecciona ambas fechas');
+                        Swal.showValidationMessage('Por favor, completa ambas fechas');
                     }
                     return { inicio, fin };
                 }
@@ -660,7 +667,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (formValues) {
                 const { inicio, fin } = formValues;
-                
+
+                // Modal de carga idéntico al superadmin
+                Swal.fire({
+                    title: 'Generando reporte...',
+                    text: 'Por favor espere un momento.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Simular pequeña pausa de carga visual y procesamiento
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
                 const donacionesFiltradas = donacionesCache.filter(item => {
                     if (!item.fecha) return false;
                     const fechaItem = item.fecha.split('T')[0];
@@ -676,56 +696,143 @@ document.addEventListener('DOMContentLoaded', () => {
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
 
-                    doc.setFontSize(18);
+                    // --- ENCABEZADO PROFESIONAL ESTILO HOSPITAL ---
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(16);
+                    doc.setTextColor(20, 50, 90);
+                    doc.text("HOSPITAL LUIS A. GÜEMES", 105, 15, { align: "center" });
+
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(10);
+                    doc.setTextColor(80, 80, 80);
+                    doc.text("A.O. III Aguaray - Salta | Reporte Oficial de Gestión de Donaciones", 105, 21, { align: "center" });
+
+                    doc.setDrawColor(180, 180, 180);
+                    doc.setLineWidth(0.5);
+                    doc.line(14, 25, 196, 25);
+
+                    // --- DATOS DEL PERIODO ---
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(10);
                     doc.setTextColor(40, 40, 40);
-                    doc.text("Reporte de Donaciones - Hospital", 14, 20);
+                    doc.text(`Periodo analizado: Del ${inicio} al ${fin}`, 14, 32);
                     
-                    doc.setFontSize(11);
-                    doc.setTextColor(100, 100, 100);
-                    doc.text(`Periodo: Desde ${inicio} hasta ${fin}`, 14, 28);
-                    doc.text(`Fecha de emisión: ${new Date().toLocaleDateString('es-AR')}`, 14, 34);
+                    const fechaEmisionStr = new Date().toLocaleDateString('es-AR');
+                    doc.text(`Fecha de emisión: ${fechaEmisionStr}`, 14, 38);
 
-                    const totalDonaciones = donacionesFiltradas.length;
-                    const aprobadas = donacionesFiltradas.filter(d => d.estado === 'Aprobado y Destinado').length;
-                    const rechazadas = donacionesFiltradas.filter(d => d.estado === 'Rechazado').length;
+                    // --- CAJA DE RESUMEN GENERAL ---
+                    const totalReg = donacionesFiltradas.length;
+                    const aprobadasDest = donacionesFiltradas.filter(d => d.estado === 'Aprobado y Destinado').length;
+                    const rechazadasCount = donacionesFiltradas.filter(d => d.estado === 'Rechazado').length;
 
-                    doc.setFontSize(10);
-                    doc.text(`Total Registros: ${totalDonaciones} | Aprobadas: ${aprobadas} | Rechazadas: ${rechazadas}`, 14, 42);
-
-                    let y = 52;
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'bold');
-                    doc.text("ID", 14, y);
-                    doc.text("Donante", 25, y);
-                    doc.text("Categoría", 90, y);
-                    doc.text("Estado", 140, y);
-                    doc.text("Fecha", 170, y);
+                    doc.setFillColor(240, 243, 246);
+                    doc.roundedRect(14, 43, 182, 16, 2, 2, 'F');
                     
-                    doc.setFont(undefined, 'normal');
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(9.5);
+                    doc.setTextColor(30, 30, 30);
+                    doc.text("Resumen General del Periodo:", 18, 51);
+                    
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`• Total Registradas: ${totalReg}  |  • Aprobadas y Destinadas: ${aprobadasDest}  |  • Rechazadas: ${rechazadasCount}`, 18, 56);
+
+                    let y = 68;
+
+                    // --- SECCIÓN 1: APROBADAS Y DESTINADAS ---
+                    const listaAprobadas = donacionesFiltradas.filter(d => d.estado === 'Aprobado y Destinado' || d.estado === 'Recibido' || d.estado === 'Aprobado');
+                    
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(12);
+                    doc.setTextColor(34, 139, 34); // Verde institucional
+                    doc.text(`1. Sección: Donaciones Aprobadas y Destinadas (${listaAprobadas.length})`, 14, y);
                     y += 6;
-                    doc.line(14, y - 2, 196, y - 2);
 
-                    donacionesFiltradas.forEach(item => {
-                        if (y > 270) {
-                            doc.addPage();
-                            y = 20;
-                        }
-                        const idText = `#${item.id || item._id}`;
-                        const nombreText = (item.nombre || 'Anónimo').substring(0, 25);
-                        const catText = (item.categoria || 'N/D').substring(0, 15);
-                        const estadoText = (item.estado || 'Pendiente').substring(0, 15);
-                        const fechaText = item.fecha ? new Date(item.fecha).toLocaleDateString('es-AR') : 'N/D';
+                    // Cabecera tabla aprobadas
+                    doc.setFontSize(9);
+                    doc.setTextColor(80, 80, 80);
+                    doc.text("Donante / Categoría", 14, y);
+                    doc.text("Cantidad", 110, y);
+                    doc.text("Fecha", 170, y);
+                    y += 2;
+                    doc.setLineWidth(0.3);
+                    doc.line(14, y, 196, y);
+                    y += 5;
 
-                        doc.text(idText, 14, y);
-                        doc.text(nombreText, 25, y);
-                        doc.text(catText, 90, y);
-                        doc.text(estadoText, 140, y);
-                        doc.text(fechaText, 170, y);
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9);
+                    doc.setTextColor(40, 40, 40);
+
+                    if (listaAprobadas.length === 0) {
+                        doc.text("No hay registros en esta sección para el periodo seleccionado.", 14, y);
                         y += 8;
-                    });
+                    } else {
+                        listaAprobadas.forEach(item => {
+                            if (y > 270) { doc.addPage(); y = 20; }
+                            const donanteCat = `${item.nombre || 'Anónimo'} (${item.categoria || 'General'})`;
+                            const cantText = `${item.cantidad || 1} un.`;
+                            const fecText = item.fecha ? new Date(item.fecha).toLocaleDateString('es-AR') : 'N/D';
+
+                            doc.text(donanteCat.substring(0, 60), 14, y);
+                            doc.text(cantText, 110, y);
+                            doc.text(fecText, 170, y);
+                            y += 7;
+                        });
+                    }
+
+                    y += 6;
+
+                    // --- SECCIÓN 2: RECHAZADAS ---
+                    const listaRechazadas = donacionesFiltradas.filter(d => d.estado === 'Rechazado');
+
+                    if (y > 250) { doc.addPage(); y = 20; }
+
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(12);
+                    doc.setTextColor(200, 40, 40); // Rojo institucional
+                    doc.text(`2. Sección: Donaciones Rechazadas (${listaRechazadas.length})`, 14, y);
+                    y += 6;
+
+                    // Cabecera tabla rechazadas
+                    doc.setFontSize(9);
+                    doc.setTextColor(80, 80, 80);
+                    doc.text("Donante / Categoría", 14, y);
+                    doc.text("Motivo de Rechazo", 110, y);
+                    y += 2;
+                    doc.line(14, y, 196, y);
+                    y += 5;
+
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9);
+                    doc.setTextColor(40, 40, 40);
+
+                    if (listaRechazadas.length === 0) {
+                        doc.text("No hay donaciones rechazadas en este periodo.", 14, y);
+                    } else {
+                        listaRechazadas.forEach(item => {
+                            if (y > 270) { doc.addPage(); y = 20; }
+                            const donanteCat = `${item.nombre || 'Anónimo'} (${item.categoria || 'General'})`;
+                            
+                            let motivo = 'Sin especificar';
+                            if (item.descripcion && item.descripcion.includes('[RECHAZADO:')) {
+                                const partes = item.descripcion.split('| [RECHAZADO:');
+                                motivo = partes[1].replace(']', '').trim();
+                            }
+
+                            doc.text(donanteCat.substring(0, 50), 14, y);
+                            doc.text(motivo.substring(0, 45), 110, y);
+                            y += 7;
+                        });
+                    }
 
                     doc.save(`Reporte_Donaciones_${inicio}_al_${fin}.pdf`);
-                    Swal.fire('¡Éxito!', 'El reporte en PDF se ha descargado correctamente.', 'success');
+
+                    // Modal de éxito idéntico al superadmin
+                    Swal.fire({
+                        title: '¡Reporte generado!',
+                        text: 'El PDF se ha descargado correctamente.',
+                        icon: 'success',
+                        confirmButtonColor: '#28a745'
+                    });
 
                 } catch (err) {
                     console.error("Error al generar PDF:", err);
@@ -802,7 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Inicialización al cargar la página de manera segura
+    // Inicialización al cargar la página
     cargarDonaciones();
     cargarUsuarios();
 });
