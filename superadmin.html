@@ -663,11 +663,12 @@
         }
 
         // ==========================================
-        // 6. GENERADOR DE REPORTE PDF POR PERIODO (SweetAlert2) - Globalizado
+        // 6. GENERADOR DE REPORTE PDF POR PERIODO (SweetAlert2)
         // ==========================================
-        window.abrirModalReporteFechas = function() {
+        function abrirModalReporteFechas() {
             if (typeof Swal === 'undefined') {
                 console.error("SweetAlert2 no está cargado.");
+                alert("SweetAlert2 no está disponible en la página.");
                 return;
             }
 
@@ -705,12 +706,23 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     const { fechaInicio, fechaFin } = result.value;
-                    window.descargarReportePdfPeriodo(fechaInicio, fechaFin);
+                    descargarReportePdfPeriodo(fechaInicio, fechaFin);
                 }
             });
-        };
+        }
 
-        window.descargarReportePdfPeriodo = async function(fechaInicio, fechaFin) {
+        // Conexión automática por ID para evitar fallos de onclick en HTML
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnReporte = document.getElementById('btnAbrirReporte');
+            if (btnReporte) {
+                btnReporte.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    abrirModalReporteFechas();
+                });
+            }
+        });
+
+        async function descargarReportePdfPeriodo(fechaInicio, fechaFin) {
             try {
                 Swal.fire({
                     title: 'Generando reporte...',
@@ -860,7 +872,7 @@
                 console.error("Error al generar PDF:", error);
                 Swal.fire('Error', 'Hubo un problema al procesar el reporte PDF.', 'error');
             }
-        };
+        }
 
         // 7. API: Gestión de Usuarios
         async function cargarUsuarios() {
@@ -961,9 +973,9 @@
     </a>
 
     <!-- Opción para generar el reporte en PDF por fechas -->
-    <a href="javascript:void(0);" id="btnReportePeriodo" onclick="abrirModalReporteFechas();" class="enlace-manual">
+   <a href="javascript:void(0);" id="btnAbrirReporte" class="enlace-manual">
     Generar Reporte por Periodo
-</a>
+</a>>
 </div>
 </body>
 </html>
