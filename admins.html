@@ -550,27 +550,15 @@ document.addEventListener('DOMContentLoaded', () => {
             let descripcionExtra = "";
 
             if (nuevoEstado === 'Rechazado') {
-                const resultado = await Swal.fire({
-                    title: 'Motivo del Rechazo',
-                    input: 'textarea',
-                    inputPlaceholder: 'Escriba detalladamente el motivo del rechazo...',
-                    inputValidator: (value) => {
-                        if (!value) {
-                            return '¡Debe escribir un motivo obligatorio!';
-                        }
-                    },
-                    showCancelButton: true,
-                    confirmButtonText: 'Confirmar rechazo',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d'
-                });
-
-                if (resultado.isDismissed || !resultado.value) {
+                const motivo = prompt('Ingrese el motivo obligatorio del rechazo:');
+                
+                // Si el usuario cancela o deja vacío, revertimos la selección en la tabla y salimos
+                if (motivo === null || motivo.trim() === '') {
+                    alert('Debe ingresar un motivo obligatorio para rechazar.');
                     cargarDonaciones();
                     return;
                 }
-                descripcionExtra = ` | [RECHAZADO: ${resultado.value}]`;
+                descripcionExtra = ` | [RECHAZADO: ${motivo.trim()}]`;
             }
 
             const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
