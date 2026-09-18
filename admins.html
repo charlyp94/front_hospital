@@ -544,8 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-
-    window.cambiarEstadoDonacion = async function(id, nuevoEstado) {
+window.cambiarEstadoDonacion = async function(id, nuevoEstado) {
         try {
             let descripcionExtra = "";
 
@@ -589,7 +588,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 descripcionFinal += descripcionExtra;
             }
 
-            const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
+            // CORRECCIÓN: Apuntamos a la ruta general de la API que ya funciona en tu backend
+            const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
