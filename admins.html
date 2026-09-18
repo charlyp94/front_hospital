@@ -547,14 +547,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.cambiarEstadoDonacion = async function(id, nuevoEstado) {
         try {
+            let descripcionExtra = "";
+
+            // Si elige Rechazado, abrimos SweetAlert2 para pedir el motivo obligatorio
+            if (nuevoEstado === 'Rechazado') {
+                const { value: motivo, isDismissed } = await Swal.fire({
+                    title: 'Motivo del Rechazo',
+                    input: 'textarea',
+                    inputPlaceholder: 'Escriba detalladamente el motivo del rechazo...',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return '¡Debe escribir un motivo obligatorio!';
+                        }
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirmar rechazo',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d'
+                });
+
+                if (isDismissed) {
+                    cargarDonaciones(); // Restaura el select si cancela
+                    return;
+                }
+                descripcionExtra = ` | [RECHAZADO: ${motivo}]`;
+            }
+
             const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
             const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
             
+            // Buscamos el item actual en caché para conservar o concatenar descripción si hace falta
+            const itemActual = donacionesCache.find(d => (d.id == id || d._id == id));
+            let descripcionFinal = itemActual ? (itemActual.descripcion || itemActual.elementos || '') : '';
+            
+            // Si ya tenía un rechazo previo lo limpiamos antes de adjuntar el nuevo
+            if (descripcionFinal.includes('[RECHAZADO:')) {
+                descripcionFinal = descripcionFinal.split('| [RECHAZADO:')[0].trim();
+            }
+            if (descripcionExtra) {
+                descripcionFinal += descripcionExtra;
+            }
+
             const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     estado: nuevoEstado,
+                    descripcion: descripcionFinal,
                     actualizado_por: nombreUsuarioActual
                 })
             });
@@ -566,6 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error(error);
             mostrarModalTemporal('error', 'Error', 'No se pudo actualizar el estado de la donación.');
+            cargarDonaciones();
         }
     };
 
@@ -765,7 +806,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (y > 265) { doc.addPage(); y = 20; }
                             const donanteCat = `${item.nombre || 'Anónimo'} (${item.categoria || 'General'})`;
                             
-                            // Usamos splitTextToSize para permitir que salte de línea si supera los 90 mm de ancho
                             const lineasDonante = doc.splitTextToSize(donanteCat, 90);
                             
                             let detalleTexto = item.descripcion || item.elementos || 'Sin detalle';
@@ -776,14 +816,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             const fecText = item.fecha ? new Date(item.fecha).toLocaleDateString('es-AR') : 'N/D';
 
-                            // Calculamos cuántas líneas ocupa la fila más alta para ajustar el espacio vertical
                             const maxLineas = Math.max(lineasDonante.length, lineasDetalle.length);
 
                             doc.text(lineasDonante, 14, y);
                             doc.text(lineasDetalle, 110, y);
                             doc.text(fecText, 170, y);
 
-                            // Espaciado dinámico según las líneas impresas (aprox 5mm por línea + margen extra)
                             y += (maxLineas * 5) + 3;
                         });
                     }
