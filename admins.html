@@ -550,20 +550,36 @@ document.addEventListener('DOMContentLoaded', () => {
             let motivoRechazo = "";
 
             if (nuevoEstado === 'Rechazado') {
-                const motivo = prompt('Ingrese el motivo obligatorio del rechazo:');
-                
-                if (motivo === null || motivo.trim() === '') {
-                    alert('Debe ingresar un motivo obligatorio para rechazar.');
+                const { value: motivo, isDismissed } = await Swal.fire({
+                    title: 'Motivo del Rechazo',
+                    input: 'textarea',
+                    inputPlaceholder: 'Ingrese el motivo obligatorio del rechazo...',
+                    inputAttributes: {
+                        'aria-label': 'Ingrese el motivo del rechazo'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirmar Rechazo',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    inputValidator: (value) => {
+                        if (!value || value.trim() === '') {
+                            return '¡Debe ingresar un motivo obligatorio para rechazar!';
+                        }
+                    }
+                });
+
+                if (isDismissed) {
                     cargarDonaciones();
                     return;
                 }
+
                 motivoRechazo = motivo.trim();
             }
 
             const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
             const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
 
-            // CORRECCIÓN: Apuntamos a la ruta exacta del backend que incluye "/estado" y enviamos "motivoRechazo"
             const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
