@@ -544,11 +544,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-window.cambiarEstadoDonacion = async function(id, nuevoEstado) {
+
+    window.cambiarEstadoDonacion = async function(id, nuevoEstado) {
         try {
             let descripcionExtra = "";
 
-            // Si elige Rechazado, abrimos SweetAlert2 para pedir el motivo obligatorio
             if (nuevoEstado === 'Rechazado') {
                 const { value: motivo, isDismissed } = await Swal.fire({
                     title: 'Motivo del Rechazo',
@@ -567,7 +567,7 @@ window.cambiarEstadoDonacion = async function(id, nuevoEstado) {
                 });
 
                 if (isDismissed) {
-                    cargarDonaciones(); // Restaura el select si cancela
+                    cargarDonaciones();
                     return;
                 }
                 descripcionExtra = ` | [RECHAZADO: ${motivo}]`;
@@ -576,11 +576,9 @@ window.cambiarEstadoDonacion = async function(id, nuevoEstado) {
             const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
             const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
             
-            // Buscamos el item actual en caché para conservar o concatenar descripción si hace falta
             const itemActual = donacionesCache.find(d => (d.id == id || d._id == id));
             let descripcionFinal = itemActual ? (itemActual.descripcion || itemActual.elementos || '') : '';
             
-            // Si ya tenía un rechazo previo lo limpiamos antes de adjuntar el nuevo
             if (descripcionFinal.includes('[RECHAZADO:')) {
                 descripcionFinal = descripcionFinal.split('| [RECHAZADO:')[0].trim();
             }
@@ -588,7 +586,6 @@ window.cambiarEstadoDonacion = async function(id, nuevoEstado) {
                 descripcionFinal += descripcionExtra;
             }
 
-            // CORRECCIÓN: Apuntamos a la ruta general de la API que ya funciona en tu backend
             const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
