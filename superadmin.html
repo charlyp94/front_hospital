@@ -550,6 +550,7 @@
                             <select onchange="cambiarEstadoDonacion('${itemId}', this.value)" style="padding: 4px; border-radius: 4px;">
                                 <option value="" disabled selected>Pendiente (Marcar recibido...)</option>
                                 <option value="Recibido">Marcar como Recibido</option>
+                                <option value="Rechazado">Rechazado</option>
                             </select>
                         `;
                     } else if (estadoActual === 'Recibido') {
@@ -585,15 +586,69 @@
         }
 
         async function cambiarEstadoDonacion(id, nuevoEstado) {
+            // Si el usuario elige rechazar, le pedimos el motivo obligatoriamente con SweetAlert2
+            if (nuevoEstado === 'Rechazado') {
+                if (typeof Swal !== 'undefined') {
+                    const { value: motivo } = await Swal.fire({
+                        title: 'Motivo de Rechazo',
+                        input: 'text',
+                        inputLabel: 'Escribe la razón por la cual se rechaza esta donación:',
+                        inputPlaceholder: 'Ej: Producto vencido, en mal estado, etc.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Confirmar Rechazo',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        inputValidator: (value) => {
+                            if (!value) {
+                                return '¡Debes escribir un motivo para rechazar!';
+                            }
+                        }
+                    });
+
+                    if (!motivo) {
+                        cargarDonaciones();
+                        return;
+                    }
+
+                    ejecutarCambioEstadoConMotivo(id, nuevoEstado, motivo);
+                    return;
+                } else {
+                    const motivoSimple = prompt('Escribe el motivo del rechazo:');
+                    if (!motivoSimple) {
+                        cargarDonaciones();
+                        return;
+                    }
+                    ejecutarCambioEstadoConMotivo(id, nuevoEstado, motivoSimple);
+                    return;
+                }
+            }
+
+            // Para los demás estados (Recibido, Aprobado y Destinado) fluye normal
+            ejecutarCambioEstadoConMotivo(id, nuevoEstado, null);
+        }
+
+        async function ejecutarCambioEstadoConMotivo(id, nuevoEstado, motivo) {
             try {
                 const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
                 const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
                 
+                const itemActual = donacionesCache.find(d => (d.id == id || d._id == id));
+                let descripcionFinal = itemActual ? (itemActual.descripcion || '') : '';
+
+                if (nuevoEstado === 'Rechazado' && motivo) {
+                    if (descripcionFinal.includes('[RECHAZADO:')) {
+                        descripcionFinal = descripcionFinal.split('| [RECHAZADO:')[0].trim();
+                    }
+                    descripcionFinal = `${descripcionFinal} | [RECHAZADO: ${motivo}]`;
+                }
+
                 const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         estado: nuevoEstado,
+                        descripcion: descripcionFinal,
                         actualizado_por: nombreUsuarioActual
                     })
                 });
@@ -605,6 +660,7 @@
             } catch (error) {
                 console.error(error);
                 mostrarModalTemporal('error', 'Error', 'No se pudo actualizar el estado de la donación.');
+                cargarDonaciones();
             }
         }
 
@@ -663,7 +719,7 @@
         }
 
         // ==========================================
-        // 6. GENERADOR DE REPORTE PDF POR PERIODO (SweetAlert2)
+        // 5. GENERADOR DE REPORTE PDF POR PERIODO (SweetAlert2)
         // ==========================================
         function abrirModalReporteFechas() {
             if (typeof Swal === 'undefined') {
@@ -711,7 +767,6 @@
             });
         }
 
-        // Conexión automática por ID para evitar fallos de onclick en HTML
         document.addEventListener('DOMContentLoaded', () => {
             const btnReporte = document.getElementById('btnAbrirReporte');
             if (btnReporte) {
@@ -747,7 +802,6 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
-                // Encabezado institucional
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(15);
                 doc.setTextColor(44, 62, 80);
@@ -760,13 +814,11 @@
                 doc.setDrawColor(180, 180, 180);
                 doc.line(14, 28, 196, 28);
 
-                // Fechas
                 doc.setFontSize(9);
                 doc.setTextColor(50, 50, 50);
                 doc.text(`Periodo analizado: Del ${fechaInicio} al ${fechaFin}`, 14, 35);
                 doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 14, 40);
 
-                // Cuadro de Resumen General
                 doc.setFillColor(240, 243, 246);
                 doc.roundedRect(14, 45, 182, 22, 2, 2, 'F');
                 doc.setFont("helvetica", "bold");
@@ -819,7 +871,6 @@
                         const lineasDetalle = doc.splitTextToSize(detalleTexto, 75);
 
                         const fecText = d.fecha ? new Date(d.fecha).toLocaleDateString() : 'N/D';
-
                         const maxLineas = Math.max(lineasDonante.length, lineasDetalle.length);
 
                         doc.text(lineasDonante, 14, yPos);
@@ -882,7 +933,6 @@
                     });
                 }
 
-                // Pie de página general
                 doc.setFontSize(8);
                 doc.setTextColor(150, 150, 150);
                 doc.text("Sistema de Gestión Hospitalaria - Hospital Luis A. Güemes", 105, 285, { align: "center" });
@@ -903,7 +953,7 @@
             }
         }
 
-        // 7. API: Gestión de Usuarios
+        // 6. API: Gestión de Usuarios
         async function cargarUsuarios() {
             const tbody = document.getElementById('tablaUsuarios');
             if (!tbody) return;
@@ -970,7 +1020,6 @@
             });
         }
 
-        // Función de eliminación con SweetAlert2 para el SuperAdmin
         async function eliminarUsuario(id) {
             if (typeof Swal === 'undefined') {
                 if (!confirm('¿Estás seguro de que deseas eliminar este usuario del sistema?')) return;
