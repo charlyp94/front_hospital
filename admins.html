@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. API: Cargar Donaciones
     window.cargarDonaciones = async function() {
         try {
-            const response = await fetch('http://localhost:3000/api/donaciones');
+            const response = await fetch('https://back-hospital-euk1.onrender.com/api/donaciones');
             if (!response.ok) throw new Error('Error al conectar con el servidor');
             
             const donaciones = await response.json();      
@@ -586,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 descripcionFinal += descripcionExtra;
             }
 
-            const response = await fetch(`http://localhost:3000/api/donaciones/${id}`, {
+            const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -890,7 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 6. API: Gestión de Usuarios
     window.cargarUsuarios = async function() {
         try {
-            const response = await fetch('http://localhost:3000/api/usuarios');
+            const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios');
             if (!response.ok) throw new Error('Error al obtener usuarios');
             
             const usuarios = await response.json();
@@ -936,7 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const rol = 'usuario';
 
             try {
-                const response = await fetch('http://localhost:3000/api/usuarios', {
+                const response = await fetch('https://back-hospital-euk1.onrender.com/api/usuarios', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nombre, nombre_usuario, dni, contrasena, rol })
