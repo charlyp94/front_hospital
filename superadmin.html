@@ -586,7 +586,9 @@
         }
 
         async function cambiarEstadoDonacion(id, nuevoEstado) {
-            // Si el usuario elige rechazar, le pedimos el motivo obligatoriamente con SweetAlert2
+            let motivoRechazo = null;
+
+            // Si el administrador selecciona 'Rechazado', exigimos obligatoriamente el motivo con SweetAlert2
             if (nuevoEstado === 'Rechazado') {
                 if (typeof Swal !== 'undefined') {
                     const { value: motivo } = await Swal.fire({
@@ -607,59 +609,47 @@
                     });
 
                     if (!motivo) {
-                        cargarDonaciones();
+                        cargarDonaciones(); // Restaura el select si cancela
                         return;
                     }
-
-                    ejecutarCambioEstadoConMotivo(id, nuevoEstado, motivo);
-                    return;
+                    motivoRechazo = motivo;
                 } else {
-                    const motivoSimple = prompt('Escribe el motivo del rechazo:');
-                    if (!motivoSimple) {
+                    motivoRechazo = prompt('Escribe el motivo del rechazo:');
+                    if (!motivoRechazo) {
                         cargarDonaciones();
                         return;
                     }
-                    ejecutarCambioEstadoConMotivo(id, nuevoEstado, motivoSimple);
-                    return;
                 }
             }
 
-            // Para los demás estados (Recibido, Aprobado y Destinado) fluye normal
-            ejecutarCambioEstadoConMotivo(id, nuevoEstado, null);
-        }
-
-        async function ejecutarCambioEstadoConMotivo(id, nuevoEstado, motivo) {
             try {
                 const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
                 const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
                 
-                const itemActual = donacionesCache.find(d => (d.id == id || d._id == id));
-                let descripcionFinal = itemActual ? (itemActual.descripcion || '') : '';
+                // Estructura exacta que el servidor backend (server.js) procesa correctamente
+                const cuerpoPeticion = {
+                    estado: nuevoEstado,
+                    actualizado_por: nombreUsuarioActual
+                };
 
-                if (nuevoEstado === 'Rechazado' && motivo) {
-                    if (descripcionFinal.includes('[RECHAZADO:')) {
-                        descripcionFinal = descripcionFinal.split('| [RECHAZADO:')[0].trim();
-                    }
-                    descripcionFinal = `${descripcionFinal} | [RECHAZADO: ${motivo}]`;
+                if (motivoRechazo) {
+                    cuerpoPeticion.motivoRechazo = motivoRechazo;
                 }
 
                 const response = await fetch(`https://back-hospital-euk1.onrender.com/api/donaciones/${id}/estado`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        estado: nuevoEstado,
-                        descripcion: descripcionFinal,
-                        actualizado_por: nombreUsuarioActual
-                    })
+                    body: JSON.stringify(cuerpoPeticion)
                 });
                 
-                if (!response.ok) throw new Error('No se pudo actualizar el estado');
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'No se pudo actualizar el estado');
                 
                 mostrarModalTemporal('success', '¡Estado Actualizado!', `La donación ahora figura como: ${nuevoEstado}`);
                 cargarDonaciones();
             } catch (error) {
                 console.error(error);
-                mostrarModalTemporal('error', 'Error', 'No se pudo actualizar el estado de la donación.');
+                mostrarModalTemporal('error', 'Error', error.message || 'No se pudo actualizar el estado de la donación.');
                 cargarDonaciones();
             }
         }
