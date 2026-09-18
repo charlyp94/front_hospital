@@ -546,17 +546,18 @@
                     if (esFinal) {
                         selectHtml = `<span style="font-size: 0.85rem; color: #666; font-style: italic;">🔒 Cerrado (${estadoActual})</span>`;
                     } else if (estadoActual === 'Pendiente') {
+                        // Estricto: Si está en Pendiente, SOLO puede avanzar a Recibido (sin saltos ni retrocesos)
                         selectHtml = `
                             <select onchange="cambiarEstadoDonacion('${itemId}', this.value)" style="padding: 4px; border-radius: 4px;">
-                                <option value="" disabled selected>Pendiente (Marcar recibido...)</option>
+                                <option value="" disabled selected>Pendiente (Acción...)</option>
                                 <option value="Recibido">Marcar como Recibido</option>
-                                <option value="Rechazado">Rechazado</option>
                             </select>
                         `;
                     } else if (estadoActual === 'Recibido') {
+                        // Estricto: Si está en Recibido, SOLO puede ir a Aprobado o Rechazado
                         selectHtml = `
                             <select onchange="cambiarEstadoDonacion('${itemId}', this.value)" style="padding: 4px; border-radius: 4px;">
-                                <option value="" disabled selected>En Hospital (Elegir destino...)</option>
+                                <option value="" disabled selected>En Hospital (Destino...)</option>
                                 <option value="Aprobado y Destinado">Aprobado y Destinado</option>
                                 <option value="Rechazado">Rechazado</option>
                             </select>
@@ -588,7 +589,6 @@
         async function cambiarEstadoDonacion(id, nuevoEstado) {
             let motivoRechazo = null;
 
-            // Si el administrador selecciona 'Rechazado', exigimos obligatoriamente el motivo con SweetAlert2
             if (nuevoEstado === 'Rechazado') {
                 if (typeof Swal !== 'undefined') {
                     const { value: motivo } = await Swal.fire({
@@ -609,7 +609,7 @@
                     });
 
                     if (!motivo) {
-                        cargarDonaciones(); // Restaura el select si cancela
+                        cargarDonaciones();
                         return;
                     }
                     motivoRechazo = motivo;
@@ -626,7 +626,6 @@
                 const datosUser = JSON.parse(sessionStorage.getItem('usuarioLogueado') || '{}');
                 const nombreUsuarioActual = datosUser.nombre || datosUser.nombre_usuario || 'Admin';
                 
-                // Estructura exacta que el servidor backend (server.js) procesa correctamente
                 const cuerpoPeticion = {
                     estado: nuevoEstado,
                     actualizado_por: nombreUsuarioActual
