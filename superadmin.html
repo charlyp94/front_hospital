@@ -970,8 +970,31 @@
             });
         }
 
+        // Función de eliminación con SweetAlert2 para el SuperAdmin
         async function eliminarUsuario(id) {
-            if (!confirm('¿Estás seguro de que deseas eliminar este usuario del sistema?')) return;
+            if (typeof Swal === 'undefined') {
+                if (!confirm('¿Estás seguro de que deseas eliminar este usuario del sistema?')) return;
+                ejecutarEliminacionUsuario(id);
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: '¿Eliminar usuario?',
+                text: '¿Estás seguro de que deseas eliminar este usuario del sistema? Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d'
+            });
+
+            if (result.isConfirmed) {
+                ejecutarEliminacionUsuario(id);
+            }
+        }
+
+        async function ejecutarEliminacionUsuario(id) {
             try {
                 const response = await fetch(`https://back-hospital-euk1.onrender.com/api/usuarios/${id}`, {
                     method: 'DELETE'
