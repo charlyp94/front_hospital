@@ -412,7 +412,7 @@
                     <!-- DESCRIPCIÓN -->
                     <div class="form-grupo" style="margin-top: 15px;">
                         <label for="descripcion" style="font-weight: bold; display: block; margin-bottom: 8px;">Descripción / Detalle de los insumos:</label>
-                        <textarea id="descripcion" name="descripcion" rows="3" placeholder="Ej: 5 cajas de gasas esterilizadas, 2 botellas de alcohol 500ml..."
+                        <textarea id="descripcion" name="descripcion" rows="3" required placeholder="Ej: 5 cajas de gasas esterilizadas, 2 botellas de alcohol 500ml..."
                             style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; resize: vertical;"></textarea>
                     </div>
                 </div>
@@ -538,26 +538,44 @@
             }
 
             // Validación estricta antes de enviar el formulario de donaciones
-            const formDonacion = document.getElementById('formDonacion');
-            if (formDonacion) {
-                formDonacion.addEventListener('submit', (e) => {
-                    const categoriasMarcadas = formDonacion.querySelectorAll('input[name="categorias"]:checked');
-                    if (categoriasMarcadas.length === 0) {
-                        e.preventDefault();
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Categoría requerida',
-                                text: 'Por favor, seleccioná al menos una categoría de donación antes de continuar.',
-                                confirmButtonColor: '#2c3e50'
-                            });
-                        } else {
-                            alert('Por favor, seleccioná al menos una categoría de donación.');
-                        }
-                    }
+const formDonacion = document.getElementById('formDonacion');
+if (formDonacion) {
+    formDonacion.addEventListener('submit', (e) => {
+        const categoriasMarcadas = formDonacion.querySelectorAll('input[name="categorias"]:checked');
+        if (categoriasMarcadas.length === 0) {
+            e.preventDefault();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Categoría requerida',
+                    text: 'Por favor, seleccioná al menos una categoría de donación antes de continuar.',
+                    confirmButtonColor: '#2c3e50'
                 });
+            } else {
+                alert('Por favor, seleccioná al menos una categoría de donación.');
             }
-        });
+            return;
+        }
+
+        // --- VALIDACIÓN DE DESCRIPCIÓN AGREGADA ---
+        const descripcionInput = document.getElementById('descripcion');
+        if (descripcionInput && !descripcionInput.value.trim()) {
+            e.preventDefault();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Descripción requerida',
+                    text: 'Por favor, ingresá una descripción o detalle de los insumos a donar.',
+                    confirmButtonColor: '#2c3e50'
+                });
+            } else {
+                alert('Por favor, ingresá una descripción de la donación.');
+            }
+            return;
+        }
+    });
+}
+    });
     </script>
 </body>
 
